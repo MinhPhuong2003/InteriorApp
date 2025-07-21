@@ -21,13 +21,13 @@ const CreateNewPasswordScreen = ({ navigation }) => {
         <Icon name="arrow-back" size={24} color="#000" />
       </TouchableOpacity>
 
-      <Text style={styles.title}>Create New Password</Text>
+      <Text style={styles.title}>Tạo Mật Khẩu Mới</Text>
 
       {/* Mật khẩu mới */}
       <View style={styles.inputBox}>
         <Icon name="lock-closed-outline" size={20} color="#999" style={styles.icon} />
         <TextInput
-          placeholder="Enter new password"
+          placeholder="Nhập mật khẩu mới"
           secureTextEntry={!showPassword}
           value={password}
           onChangeText={setPassword}
@@ -46,7 +46,7 @@ const CreateNewPasswordScreen = ({ navigation }) => {
       <View style={styles.inputBox}>
         <Icon name="lock-closed-outline" size={20} color="#999" style={styles.icon} />
         <TextInput
-          placeholder="Confirm new password"
+          placeholder="Xác nhận mật khẩu mới"
           secureTextEntry={!showConfirm}
           value={confirm}
           onChangeText={setConfirm}
@@ -63,18 +63,18 @@ const CreateNewPasswordScreen = ({ navigation }) => {
 
       <View style={styles.rules}>
         <Text style={styles.ruleText}>
-          <Text style={styles.red}>✔</Text> One letter must be capital
+          <Text style={styles.red}>✔</Text> Ít nhất một chữ cái viết hoa
         </Text>
         <Text style={styles.ruleText}>
-          <Text style={styles.red}>✔</Text> One number
+          <Text style={styles.red}>✔</Text> Ít nhất một số
         </Text>
       </View>
 
       <TouchableOpacity
         style={styles.button}
         onPress={() => navigation.navigate('PasswordResetSuccess')}
-        >
-        <Text style={styles.buttonText}>Set Password</Text>
+      >
+        <Text style={styles.buttonText}>Đặt Mật Khẩu</Text>
       </TouchableOpacity>
     </SafeAreaView>
   );

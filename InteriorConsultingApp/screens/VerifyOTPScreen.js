@@ -21,9 +21,9 @@ const VerifyOTPScreen = ({ navigation }) => {
         <Icon name="arrow-back" size={24} color="#000" />
       </TouchableOpacity>
 
-      <Text style={styles.title}>Verify OTP</Text>
+      <Text style={styles.title}>Xác Nhận OTP</Text>
       <Text style={styles.subtitle}>
-        We sent a code to dan********@gmail.com
+        Chúng tôi đã gửi mã tới địa chỉ dan********@gmail.com
       </Text>
 
       <View style={styles.otpContainer}>
@@ -47,7 +47,7 @@ const VerifyOTPScreen = ({ navigation }) => {
         style={styles.button}
         onPress={() => navigation.navigate('CreateNewPassword')}
       >
-        <Text style={styles.buttonText}>Verify</Text>
+        <Text style={styles.buttonText}>Xác Nhận</Text>
       </TouchableOpacity>
     </SafeAreaView>
   );

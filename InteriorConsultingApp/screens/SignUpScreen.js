@@ -26,9 +26,9 @@ const SignUpScreen = ({ navigation }) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <Text style={styles.title}>Sign Up</Text>
+      <Text style={styles.title}>Đăng Ký</Text>
       <Text style={styles.subtitle}>
-        You don't have a accounts yet{'\n'}create a new account
+        Bạn chưa có tài khoản?{'\n'}Hãy tạo một tài khoản mới
       </Text>
 
       <Formik
@@ -41,12 +41,12 @@ const SignUpScreen = ({ navigation }) => {
       >
         {({ handleChange, handleBlur, handleSubmit, values, errors, touched }) => (
           <>
-            {/* User Name */}
+            {/* Tên người dùng */}
             <View style={styles.inputContainer}>
               <Icon name="person-outline" size={20} color="#999" style={styles.icon} />
               <TextInput
                 style={styles.input}
-                placeholder="User Name"
+                placeholder="Tên người dùng"
                 onChangeText={handleChange('name')}
                 onBlur={handleBlur('name')}
                 value={values.name}
@@ -68,12 +68,12 @@ const SignUpScreen = ({ navigation }) => {
             </View>
             {touched.email && errors.email && <Text style={styles.error}>{errors.email}</Text>}
 
-            {/* Password */}
+            {/* Mật khẩu */}
             <View style={styles.inputContainer}>
               <Icon name="lock-closed-outline" size={20} color="#999" style={styles.icon} />
               <TextInput
                 style={styles.input}
-                placeholder="New Password"
+                placeholder="Mật khẩu mới"
                 secureTextEntry={!showPassword}
                 onChangeText={handleChange('password')}
                 onBlur={handleBlur('password')}
@@ -91,12 +91,12 @@ const SignUpScreen = ({ navigation }) => {
               <Text style={styles.error}>{errors.password}</Text>
             )}
 
-            {/* Confirm Password */}
+            {/* Xác nhận mật khẩu */}
             <View style={styles.inputContainer}>
               <Icon name="lock-closed-outline" size={20} color="#999" style={styles.icon} />
               <TextInput
                 style={styles.input}
-                placeholder="Confirm Password"
+                placeholder="Xác nhận mật khẩu"
                 secureTextEntry={!showConfirmPassword}
                 onChangeText={handleChange('confirmPassword')}
                 onBlur={handleBlur('confirmPassword')}
@@ -116,16 +116,16 @@ const SignUpScreen = ({ navigation }) => {
               <Text style={styles.error}>{errors.confirmPassword}</Text>
             )}
 
-            {/* Register Button */}
+            {/* Nút đăng ký */}
             <TouchableOpacity style={styles.button} onPress={handleSubmit}>
-              <Text style={styles.buttonText}>Register</Text>
+              <Text style={styles.buttonText}>Đăng Ký</Text>
             </TouchableOpacity>
 
-            {/* Already have account? Login */}
+            {/* Đã có tài khoản? Đăng nhập */}
             <View style={styles.signupContainer}>
-              <Text>Already have an account?</Text>
+              <Text>Bạn đã có tài khoản?</Text>
               <TouchableOpacity onPress={() => navigation.navigate('Login')}>
-                <Text style={styles.signupText}> Login</Text>
+                <Text style={styles.signupText}> Đăng Nhập</Text>
               </TouchableOpacity>
             </View>
           </>

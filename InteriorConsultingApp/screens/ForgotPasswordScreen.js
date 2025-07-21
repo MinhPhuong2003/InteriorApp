@@ -21,12 +21,12 @@ const ForgotPasswordScreen = ({ navigation }) => {
       </TouchableOpacity>
 
       {/* Tiêu đề */}
-      <Text style={styles.title}>Forgot Password</Text>
+      <Text style={styles.title}>Quên Mật Khẩu</Text>
       <Text style={styles.subtitle}>
-        Enter your email which is linked{'\n'}with your account
+        Vui lòng nhập email{'\n'}đã liên kết với tài khoản của bạn
       </Text>
 
-      {/* Email Input */}
+      {/* Nhập email */}
       <View style={styles.inputContainer}>
         <Icon name="mail-outline" size={20} color="#999" style={styles.icon} />
         <TextInput
@@ -37,12 +37,12 @@ const ForgotPasswordScreen = ({ navigation }) => {
         />
       </View>
 
-      {/* Gửi OTP */}
+      {/* Gửi mã OTP */}
       <TouchableOpacity
         style={styles.button}
         onPress={() => navigation.navigate('VerifyOTP')}
       >
-        <Text style={styles.buttonText}>Send OTP</Text>
+        <Text style={styles.buttonText}>Gửi Mã OTP</Text>
       </TouchableOpacity>
     </SafeAreaView>
   );

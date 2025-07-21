@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   StyleSheet,
   SafeAreaView,
+  Image, 
 } from 'react-native';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
@@ -22,7 +23,11 @@ const LoginScreen = ({ navigation }) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <Text style={styles.title}>WELCOME TO CHICHI INTERIOR!</Text>
+      <Image
+                source={require('../assets/logo.png')} // Thay bằng ảnh đại diện thật
+                style={styles.avatar}
+              />
+      <Text style={styles.title}>CHÀO MỪNG ĐẾN VỚI CHICHI INTERIOR!</Text>
 
       <Formik
         initialValues={{ email: '', password: '' }}
@@ -43,7 +48,7 @@ const LoginScreen = ({ navigation }) => {
       >
         {({ handleChange, handleBlur, handleSubmit, values, errors, touched }) => (
           <>
-            {/* Email Input */}
+            {/* Nhập Email */}
             <View style={styles.inputContainer}>
               <Icon name="mail-outline" size={20} color="#666" style={styles.inputIcon} />
               <TextInput
@@ -59,12 +64,12 @@ const LoginScreen = ({ navigation }) => {
               <Text style={styles.error}>{errors.email}</Text>
             )}
 
-            {/* Password Input */}
+            {/* Nhập Mật khẩu */}
             <View style={styles.inputContainer}>
               <Icon name="lock-closed-outline" size={20} color="#666" style={styles.inputIcon} />
               <TextInput
                 style={styles.textInput}
-                placeholder="Password"
+                placeholder="Mật khẩu"
                 secureTextEntry={secureText}
                 onChangeText={handleChange('password')}
                 onBlur={handleBlur('password')}
@@ -83,7 +88,7 @@ const LoginScreen = ({ navigation }) => {
               <Text style={styles.error}>{errors.password}</Text>
             )}
 
-            {/* Remember Me & Forgot Password */}
+            {/* Ghi nhớ đăng nhập & Quên mật khẩu */}
             <View style={styles.rememberRow}>
               <TouchableOpacity
                 style={styles.checkboxContainer}
@@ -97,47 +102,47 @@ const LoginScreen = ({ navigation }) => {
                 >
                   {rememberMe && <Icon name="checkmark" size={14} color="#fff" />}
                 </View>
-                <Text style={styles.rememberText}>Remember Me</Text>
+                <Text style={styles.rememberText}>Ghi nhớ đăng nhập</Text>
               </TouchableOpacity>
 
               <TouchableOpacity onPress={() => navigation.navigate('ForgotPassword')}>
-                <Text style={styles.linkText}>Forgot Password?</Text>
+                <Text style={styles.linkText}>Quên mật khẩu?</Text>
               </TouchableOpacity>
             </View>
 
-            {/* Login Button */}
+            {/* Nút Đăng nhập */}
             <TouchableOpacity style={styles.button} onPress={handleSubmit}>
-              <Text style={styles.buttonText}>Login</Text>
+              <Text style={styles.buttonText}>Đăng nhập</Text>
             </TouchableOpacity>
 
-            {/* Divider */}
+            {/* Hoặc đăng nhập với */}
             <View style={styles.divider}>
               <View style={styles.line} />
-              <Text style={styles.orText}>or sign in with</Text>
+              <Text style={styles.orText}>hoặc đăng nhập với</Text>
               <View style={styles.line} />
             </View>
 
-            {/* Google Login */}
+            {/* Đăng nhập Google */}
             <TouchableOpacity style={styles.socialBtn}>
               <View style={styles.socialContent}>
                 <Icon name="logo-google" size={20} color="#DB4437" style={styles.socialIcon} />
-                <Text style={styles.socialText}>Continue with Google</Text>
+                <Text style={styles.socialText}>Tiếp tục với Google</Text>
               </View>
             </TouchableOpacity>
 
-            {/* Facebook Login */}
+            {/* Đăng nhập Facebook */}
             <TouchableOpacity style={styles.socialBtn}>
               <View style={styles.socialContent}>
                 <Icon name="logo-facebook" size={20} color="#1877F2" style={styles.socialIcon} />
-                <Text style={styles.socialText}>Continue with Facebook</Text>
+                <Text style={styles.socialText}>Tiếp tục với Facebook</Text>
               </View>
             </TouchableOpacity>
 
-            {/* Sign Up */}
+            {/* Đăng ký tài khoản */}
             <View style={styles.signupContainer}>
-              <Text>Don't have account?</Text>
+              <Text>Bạn chưa có tài khoản?</Text>
               <TouchableOpacity onPress={() => navigation.navigate('SignUp')}>
-                <Text style={styles.signupText}> Sign Up</Text>
+                <Text style={styles.signupText}> Đăng ký</Text>
               </TouchableOpacity>
             </View>
           </>
@@ -272,4 +277,12 @@ const styles = StyleSheet.create({
     color: '#4A44F2',
     fontWeight: 'bold',
   },
+  avatar: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    marginBottom: 16,
+    alignSelf: 'center',
+  },
+
 });

@@ -14,7 +14,11 @@ import InteriorDetailScreen from '../screens/InteriorDetailScreen';
 import BookingScreen from '../screens/BookingScreen';
 import ProductScreen from '../screens/ProductScreen';
 import ProductDetailScreen from '../screens/ProductDetailScreen';
-
+import CartScreen from '../screens/CartScreen';
+import CheckOutScreen from '../screens/CheckOutScreen';
+import VlogScreen from '../screens/VlogScreen';
+import ContactScreen from '../screens/ContactScreen';
+import HelpScreen from '../screens/HelpScreen';
 const Stack = createNativeStackNavigator();
 
 const AppNavigator = () => (
@@ -32,6 +36,11 @@ const AppNavigator = () => (
     <Stack.Screen name="Booking" component={BookingScreen} />
     <Stack.Screen name="Product" component={ProductScreen} />
     <Stack.Screen name="ProductDetail" component={ProductDetailScreen} />
+    <Stack.Screen name="Cart" component={CartScreen} />
+    <Stack.Screen name="CheckOut" component={CheckOutScreen} />
+    <Stack.Screen name="Vlog" component={VlogScreen} />
+    <Stack.Screen name="Contact" component={ContactScreen} />
+    <Stack.Screen name="Help" component={HelpScreen} />
   </Stack.Navigator>
 );
 
