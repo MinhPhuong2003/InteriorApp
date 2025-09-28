@@ -6,14 +6,44 @@ import {
   TouchableOpacity,
   StyleSheet,
   SafeAreaView,
+  ActivityIndicator,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
+import auth from '@react-native-firebase/auth';
+import { Formik } from 'formik';
+import * as Yup from 'yup';
+
+const passwordSchema = Yup.object().shape({
+  password: Yup.string()
+    .min(6, 'Mật khẩu ít nhất 6 ký tự')
+    .required('Bắt buộc nhập'),
+  confirm: Yup.string()
+    .oneOf([Yup.ref('password'), null], 'Mật khẩu xác nhận không khớp')
+    .required('Bắt buộc nhập'),
+});
 
 const CreateNewPasswordScreen = ({ navigation }) => {
-  const [password, setPassword] = useState('');
-  const [confirm, setConfirm] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const handleChangePassword = async (values) => {
+    try {
+      setLoading(true);
+      const user = auth().currentUser;
+      if (user) {
+        await user.updatePassword(values.password);
+        setLoading(false);
+        navigation.replace('PasswordResetSuccess');
+      } else {
+        setLoading(false);
+        console.log('❌ Không tìm thấy người dùng, vui lòng đăng nhập lại.');
+      }
+    } catch (error) {
+      setLoading(false);
+      console.log('❌ Lỗi đổi mật khẩu:', error.message);
+    }
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -23,59 +53,72 @@ const CreateNewPasswordScreen = ({ navigation }) => {
 
       <Text style={styles.title}>Tạo Mật Khẩu Mới</Text>
 
-      {/* Mật khẩu mới */}
-      <View style={styles.inputBox}>
-        <Icon name="lock-closed-outline" size={20} color="#999" style={styles.icon} />
-        <TextInput
-          placeholder="Nhập mật khẩu mới"
-          secureTextEntry={!showPassword}
-          value={password}
-          onChangeText={setPassword}
-          style={styles.input}
-        />
-        <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
-          <Icon
-            name={showPassword ? 'eye-off-outline' : 'eye-outline'}
-            size={20}
-            color="#999"
-          />
-        </TouchableOpacity>
-      </View>
-
-      {/* Xác nhận mật khẩu */}
-      <View style={styles.inputBox}>
-        <Icon name="lock-closed-outline" size={20} color="#999" style={styles.icon} />
-        <TextInput
-          placeholder="Xác nhận mật khẩu mới"
-          secureTextEntry={!showConfirm}
-          value={confirm}
-          onChangeText={setConfirm}
-          style={styles.input}
-        />
-        <TouchableOpacity onPress={() => setShowConfirm(!showConfirm)}>
-          <Icon
-            name={showConfirm ? 'eye-off-outline' : 'eye-outline'}
-            size={20}
-            color="#999"
-          />
-        </TouchableOpacity>
-      </View>
-
-      <View style={styles.rules}>
-        <Text style={styles.ruleText}>
-          <Text style={styles.red}>✔</Text> Ít nhất một chữ cái viết hoa
-        </Text>
-        <Text style={styles.ruleText}>
-          <Text style={styles.red}>✔</Text> Ít nhất một số
-        </Text>
-      </View>
-
-      <TouchableOpacity
-        style={styles.button}
-        onPress={() => navigation.navigate('PasswordResetSuccess')}
+      <Formik
+        initialValues={{ password: '', confirm: '' }}
+        validationSchema={passwordSchema}
+        onSubmit={handleChangePassword}
       >
-        <Text style={styles.buttonText}>Đặt Mật Khẩu</Text>
-      </TouchableOpacity>
+        {({ handleChange, handleSubmit, values, errors, touched }) => (
+          <>
+            {/* Mật khẩu mới */}
+            <View style={styles.inputBox}>
+              <Icon name="lock-closed-outline" size={20} color="#999" style={styles.icon} />
+              <TextInput
+                placeholder="Nhập mật khẩu mới"
+                secureTextEntry={!showPassword}
+                value={values.password}
+                onChangeText={handleChange('password')}
+                style={styles.input}
+              />
+              <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+                <Icon
+                  name={showPassword ? 'eye-off-outline' : 'eye-outline'}
+                  size={20}
+                  color="#999"
+                />
+              </TouchableOpacity>
+            </View>
+            {touched.password && errors.password && (
+              <Text style={styles.errorText}>{errors.password}</Text>
+            )}
+
+            {/* Xác nhận mật khẩu */}
+            <View style={styles.inputBox}>
+              <Icon name="lock-closed-outline" size={20} color="#999" style={styles.icon} />
+              <TextInput
+                placeholder="Xác nhận mật khẩu mới"
+                secureTextEntry={!showConfirm}
+                value={values.confirm}
+                onChangeText={handleChange('confirm')}
+                style={styles.input}
+              />
+              <TouchableOpacity onPress={() => setShowConfirm(!showConfirm)}>
+                <Icon
+                  name={showConfirm ? 'eye-off-outline' : 'eye-outline'}
+                  size={20}
+                  color="#999"
+                />
+              </TouchableOpacity>
+            </View>
+            {touched.confirm && errors.confirm && (
+              <Text style={styles.errorText}>{errors.confirm}</Text>
+            )}
+
+            {/* Nút Đặt mật khẩu */}
+            <TouchableOpacity
+              style={styles.button}
+              onPress={handleSubmit}
+              disabled={loading}
+            >
+              {loading ? (
+                <ActivityIndicator color="#fff" />
+              ) : (
+                <Text style={styles.buttonText}>Đặt Lại Mật Khẩu</Text>
+              )}
+            </TouchableOpacity>
+          </>
+        )}
+      </Formik>
     </SafeAreaView>
   );
 };
@@ -120,30 +163,22 @@ const styles = StyleSheet.create({
     height: 45,
     fontSize: 14,
   },
-  rules: {
-    marginBottom: 20,
-    marginLeft: 5,
-  },
-  ruleText: {
-    fontSize: 13,
-    color: '#444',
-    marginVertical: 2,
-  },
-  red: {
-    color: 'red',
-    fontWeight: 'bold',
-    marginRight: 5,
-  },
   button: {
     backgroundColor: '#4A44F2',
     paddingVertical: 12,
     borderRadius: 8,
-    marginTop: 5,
+    marginTop: 20,
   },
   buttonText: {
     textAlign: 'center',
     color: '#fff',
     fontWeight: 'bold',
     fontSize: 16,
+  },
+  errorText: {
+    color: 'red',
+    fontSize: 12,
+    marginBottom: 8,
+    marginLeft: 4,
   },
 });

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -6,10 +6,44 @@ import {
   TouchableOpacity,
   StyleSheet,
   SafeAreaView,
+  Alert,
+  ActivityIndicator,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
+import auth from '@react-native-firebase/auth';
 
 const ForgotPasswordScreen = ({ navigation }) => {
+  const [email, setEmail] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const handleResetPassword = async () => {
+    if (!email) {
+      Alert.alert('Lỗi', 'Vui lòng nhập email');
+      return;
+    }
+    try {
+      setLoading(true);
+      await auth().sendPasswordResetEmail(email);
+      setLoading(false);
+
+      Alert.alert(
+        'Thành công',
+        'Liên kết đặt lại mật khẩu đã được gửi đến email của bạn.',
+        [{ text: 'OK', onPress: () => navigation.goBack() }]
+      );
+    } catch (error) {
+      setLoading(false);
+      console.error(error);
+      if (error.code === 'auth/invalid-email') {
+        Alert.alert('Lỗi', 'Email không hợp lệ');
+      } else if (error.code === 'auth/user-not-found') {
+        Alert.alert('Lỗi', 'Không tìm thấy tài khoản với email này');
+      } else {
+        Alert.alert('Lỗi', 'Đã xảy ra sự cố: ' + error.message);
+      }
+    }
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       {/* Nút quay lại */}
@@ -34,15 +68,22 @@ const ForgotPasswordScreen = ({ navigation }) => {
           placeholder="Email"
           keyboardType="email-address"
           autoCapitalize="none"
+          value={email}
+          onChangeText={setEmail}
         />
       </View>
 
-      {/* Gửi mã OTP */}
+      {/* Gửi liên kết */}
       <TouchableOpacity
         style={styles.button}
-        onPress={() => navigation.navigate('VerifyOTP')}
+        onPress={handleResetPassword}
+        disabled={loading}
       >
-        <Text style={styles.buttonText}>Gửi Mã OTP</Text>
+        {loading ? (
+          <ActivityIndicator color="#fff" />
+        ) : (
+          <Text style={styles.buttonText}>Gửi Liên Kết</Text>
+        )}
       </TouchableOpacity>
     </SafeAreaView>
   );

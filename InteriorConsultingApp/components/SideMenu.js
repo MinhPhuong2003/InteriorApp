@@ -56,8 +56,7 @@ const SideMenu = ({ visible, onClose }) => {
         navigation.navigate('Help');
         break;
       case 'Đăng xuất':
-        // Xử lý đăng xuất ở đây nếu cần
-        console.log('Đăng xuất');
+        navigation.replace('Login');
         break;
       default:
         break;

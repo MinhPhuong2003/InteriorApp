@@ -9,12 +9,12 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 
-const ProfileScreen = () => {
+const ProfileScreen = ({ navigation }) => {
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.profileCard}>
         <Image
-          source={require('../assets/logo.png')} // Thay bằng ảnh đại diện thật
+          source={require('../assets/logo.png')}
           style={styles.avatar}
         />
         <Text style={styles.name}>Võ Lê Minh Phương</Text>
@@ -44,7 +44,10 @@ const ProfileScreen = () => {
             <Text style={styles.buttonText}>Chỉnh sửa</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={[styles.button, styles.logoutButton]}>
+          <TouchableOpacity
+            style={[styles.button, styles.logoutButton]}
+            onPress={() => navigation.replace('Login')}
+          >
             <Icon name="log-out-outline" size={18} color="#fff" />
             <Text style={styles.buttonText}>Đăng xuất</Text>
           </TouchableOpacity>

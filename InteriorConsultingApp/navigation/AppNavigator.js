@@ -1,12 +1,10 @@
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-
 import SplashScreen from '../screens/SplashScreen';
 import OnboardingScreen from '../screens/OnboardingScreen';
 import LoginScreen from '../screens/LoginScreen';
 import SignUpScreen from '../screens/SignUpScreen';
 import ForgotPasswordScreen from '../screens/ForgotPasswordScreen';
-import VerifyOTPScreen from '../screens/VerifyOTPScreen';
 import CreateNewPasswordScreen from '../screens/CreateNewPasswordScreen';
 import PasswordResetSuccessScreen from '../screens/PasswordResetSuccessScreen';
 import MainTabs from './MainTabs';
@@ -19,6 +17,17 @@ import CheckOutScreen from '../screens/CheckOutScreen';
 import VlogScreen from '../screens/VlogScreen';
 import ContactScreen from '../screens/ContactScreen';
 import HelpScreen from '../screens/HelpScreen';
+import AdminDashboardScreen from '../screens/admin/AdminDashboardScreen';
+import AdminProductScreen from '../screens/admin/AdminProductScreen';
+import AdminOrderScreen from '../screens/admin/AdminOrderScreen';
+import AdminBookingScreen from '../screens/admin/AdminBookingScreen';
+import AdminUserScreen from '../screens/admin/AdminUserScreen';
+import AddProductScreen from '../screens/admin/AddProductScreen';
+import EditProductScreen from '../screens/admin/EditProductScreen';
+import ProductDetailAdminScreen from '../screens/admin/ProductDetailAdminScreen';
+import AdminCategoryScreen from '../screens/admin/AdminCategoryScreen';
+import AddCategoryScreen from '../screens/admin/AddCategoryScreen';
+
 const Stack = createNativeStackNavigator();
 
 const AppNavigator = () => (
@@ -28,7 +37,6 @@ const AppNavigator = () => (
     <Stack.Screen name="Login" component={LoginScreen} />
     <Stack.Screen name="SignUp" component={SignUpScreen} />
     <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
-    <Stack.Screen name="VerifyOTP" component={VerifyOTPScreen} />
     <Stack.Screen name="CreateNewPassword" component={CreateNewPasswordScreen} />
     <Stack.Screen name="PasswordResetSuccess" component={PasswordResetSuccessScreen} />
     <Stack.Screen name="HomeTabs" component={MainTabs} />
@@ -41,6 +49,16 @@ const AppNavigator = () => (
     <Stack.Screen name="Vlog" component={VlogScreen} />
     <Stack.Screen name="Contact" component={ContactScreen} />
     <Stack.Screen name="Help" component={HelpScreen} />
+    <Stack.Screen name="AdminDashboard" component={AdminDashboardScreen} />
+    <Stack.Screen name="AdminProduct" component={AdminProductScreen} />
+    <Stack.Screen name="AdminOrder" component={AdminOrderScreen} />
+    <Stack.Screen name="AdminBooking" component={AdminBookingScreen} />
+    <Stack.Screen name="AdminUser" component={AdminUserScreen} />
+    <Stack.Screen name="AddProduct" component={AddProductScreen} />
+    <Stack.Screen name="EditProduct" component={EditProductScreen} />
+    <Stack.Screen name="ProductDetailAdmin" component={ProductDetailAdminScreen} />
+    <Stack.Screen name="AdminCategory" component={AdminCategoryScreen} />
+    <Stack.Screen name="AddCategory" component={AddCategoryScreen} />
   </Stack.Navigator>
 );
 

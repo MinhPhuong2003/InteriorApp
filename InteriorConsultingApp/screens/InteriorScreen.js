@@ -27,13 +27,13 @@ const interiorDesigns = [
   },
   {
     id: '3',
-    name: 'Phòng ngủ tối giản',
+    name: 'Phòng bếp cổ điển',
     image: require('../assets/nhamau2.jpg'),
     detail: 'Thiết kế nhẹ nhàng với ánh sáng tự nhiên và vật liệu thân thiện.',
   },
   {
     id: '4',
-    name: 'Phòng ngủ tối giản',
+    name: 'Phòng khách cổ điển',
     image: require('../assets/nhamau2.jpg'),
     detail: 'Thiết kế nhẹ nhàng với ánh sáng tự nhiên và vật liệu thân thiện.',
   },

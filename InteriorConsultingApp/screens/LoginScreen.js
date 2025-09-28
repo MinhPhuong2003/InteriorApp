@@ -6,49 +6,78 @@ import {
   TouchableOpacity,
   StyleSheet,
   SafeAreaView,
-  Image, 
+  Image,
+  ActivityIndicator,
 } from 'react-native';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
 import Icon from 'react-native-vector-icons/Ionicons';
+import auth from '@react-native-firebase/auth';
+import firestore from '@react-native-firebase/firestore';
 
 const LoginScreen = ({ navigation }) => {
   const [secureText, setSecureText] = useState(true);
   const [rememberMe, setRememberMe] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const loginSchema = Yup.object().shape({
     email: Yup.string().email('Email không hợp lệ').required('Bắt buộc nhập'),
     password: Yup.string().min(6, 'Mật khẩu ít nhất 6 ký tự').required('Bắt buộc nhập'),
   });
 
+  const handleLogin = async (email, password) => {
+    try {
+      setLoading(true);
+      const userCredential = await auth().signInWithEmailAndPassword(email, password);
+
+      const userDoc = await firestore()
+        .collection('users')
+        .doc(userCredential.user.uid)
+        .get();
+
+      setLoading(false);
+
+      if (userDoc.exists) {
+        const { role } = userDoc.data();
+
+        if (role === 'admin') {
+          navigation.replace('AdminDashboard');
+        } else {
+          navigation.replace('HomeTabs');
+        }
+      } else {
+        alert('Không tìm thấy thông tin user!');
+      }
+    } catch (error) {
+      setLoading(false);
+      if (error.code === 'auth/invalid-email') {
+        alert('Email không hợp lệ');
+      } else if (error.code === 'auth/user-not-found') {
+        alert('Không tìm thấy tài khoản');
+      } else if (error.code === 'auth/wrong-password') {
+        alert('Sai mật khẩu');
+      } else {
+        alert('Đăng nhập thất bại: ' + error.message);
+      }
+    }
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <Image
-                source={require('../assets/logo.png')} // Thay bằng ảnh đại diện thật
-                style={styles.avatar}
-              />
+        source={require('../assets/logo.png')}
+        style={styles.avatar}
+      />
       <Text style={styles.title}>CHÀO MỪNG ĐẾN VỚI CHICHI INTERIOR!</Text>
 
       <Formik
         initialValues={{ email: '', password: '' }}
         validationSchema={loginSchema}
-        onSubmit={(values) => {
-          const hardcodedEmail = 'phuongminh392@gmail.com';
-          const hardcodedPassword = '123456';
-
-          if (
-            values.email === hardcodedEmail &&
-            values.password === hardcodedPassword
-          ) {
-            navigation.replace('HomeTabs');
-          } else {
-            alert('Sai email hoặc mật khẩu!');
-          }
-        }}
+        onSubmit={(values) => handleLogin(values.email, values.password)}
       >
         {({ handleChange, handleBlur, handleSubmit, values, errors, touched }) => (
           <>
-            {/* Nhập Email */}
+            {/* Email */}
             <View style={styles.inputContainer}>
               <Icon name="mail-outline" size={20} color="#666" style={styles.inputIcon} />
               <TextInput
@@ -58,13 +87,14 @@ const LoginScreen = ({ navigation }) => {
                 onChangeText={handleChange('email')}
                 onBlur={handleBlur('email')}
                 value={values.email}
+                autoCapitalize="none"
               />
             </View>
             {errors.email && touched.email && (
               <Text style={styles.error}>{errors.email}</Text>
             )}
 
-            {/* Nhập Mật khẩu */}
+            {/* Password */}
             <View style={styles.inputContainer}>
               <Icon name="lock-closed-outline" size={20} color="#666" style={styles.inputIcon} />
               <TextInput
@@ -88,7 +118,7 @@ const LoginScreen = ({ navigation }) => {
               <Text style={styles.error}>{errors.password}</Text>
             )}
 
-            {/* Ghi nhớ đăng nhập & Quên mật khẩu */}
+            {/* Remember + Forgot */}
             <View style={styles.rememberRow}>
               <TouchableOpacity
                 style={styles.checkboxContainer}
@@ -111,34 +141,15 @@ const LoginScreen = ({ navigation }) => {
             </View>
 
             {/* Nút Đăng nhập */}
-            <TouchableOpacity style={styles.button} onPress={handleSubmit}>
-              <Text style={styles.buttonText}>Đăng nhập</Text>
+            <TouchableOpacity style={styles.button} onPress={handleSubmit} disabled={loading}>
+              {loading ? (
+                <ActivityIndicator color="#fff" />
+              ) : (
+                <Text style={styles.buttonText}>Đăng nhập</Text>
+              )}
             </TouchableOpacity>
 
-            {/* Hoặc đăng nhập với */}
-            <View style={styles.divider}>
-              <View style={styles.line} />
-              <Text style={styles.orText}>hoặc đăng nhập với</Text>
-              <View style={styles.line} />
-            </View>
-
-            {/* Đăng nhập Google */}
-            <TouchableOpacity style={styles.socialBtn}>
-              <View style={styles.socialContent}>
-                <Icon name="logo-google" size={20} color="#DB4437" style={styles.socialIcon} />
-                <Text style={styles.socialText}>Tiếp tục với Google</Text>
-              </View>
-            </TouchableOpacity>
-
-            {/* Đăng nhập Facebook */}
-            <TouchableOpacity style={styles.socialBtn}>
-              <View style={styles.socialContent}>
-                <Icon name="logo-facebook" size={20} color="#1877F2" style={styles.socialIcon} />
-                <Text style={styles.socialText}>Tiếp tục với Facebook</Text>
-              </View>
-            </TouchableOpacity>
-
-            {/* Đăng ký tài khoản */}
+            {/* Đăng ký */}
             <View style={styles.signupContainer}>
               <Text>Bạn chưa có tài khoản?</Text>
               <TouchableOpacity onPress={() => navigation.navigate('SignUp')}>
@@ -234,40 +245,6 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     textAlign: 'center',
   },
-  divider: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginVertical: 20,
-  },
-  line: {
-    flex: 1,
-    height: 1,
-    backgroundColor: '#ccc',
-  },
-  orText: {
-    marginHorizontal: 10,
-    color: '#666',
-  },
-  socialBtn: {
-    padding: 14,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#ccc',
-    marginBottom: 10,
-    alignItems: 'center',
-  },
-  socialContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  socialIcon: {
-    marginRight: 8,
-  },
-  socialText: {
-    fontSize: 14,
-    color: '#000',
-  },
   signupContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
@@ -284,5 +261,4 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     alignSelf: 'center',
   },
-
 });

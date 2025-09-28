@@ -6,14 +6,19 @@ import {
   TouchableOpacity,
   StyleSheet,
   SafeAreaView,
+  Alert,
+  ActivityIndicator,
 } from 'react-native';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
 import Icon from 'react-native-vector-icons/Ionicons';
+import auth from '@react-native-firebase/auth';
+import firestore from '@react-native-firebase/firestore';
 
 const SignUpScreen = ({ navigation }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const signUpSchema = Yup.object().shape({
     name: Yup.string().required('Vui lòng nhập tên'),
@@ -23,6 +28,54 @@ const SignUpScreen = ({ navigation }) => {
       .oneOf([Yup.ref('password')], 'Mật khẩu không khớp')
       .required('Vui lòng xác nhận mật khẩu'),
   });
+
+  const handleSignUp = async (values) => {
+    try {
+      setLoading(true); 
+      // Tạo tài khoản Firebase Auth
+      const userCredential = await auth().createUserWithEmailAndPassword(
+        values.email,
+        values.password
+      );
+      const uid = userCredential.user.uid;
+
+      // Cập nhật tên hiển thị
+      await userCredential.user.updateProfile({
+        displayName: values.name,
+      });
+
+      // ✅ Lưu thông tin vào Firestore
+      await firestore().collection('users').doc(uid).set({
+        name: values.name,
+        email: values.email,
+        role: 'user', // mặc định là user
+        createdAt: firestore.FieldValue.serverTimestamp(),
+      });
+
+      setLoading(false); 
+      Alert.alert(
+        'Đăng ký thành công',
+        'Tài khoản đã được tạo!',
+        [
+          {
+            text: 'OK',
+            onPress: () => navigation.navigate('Login'),
+          },
+        ],
+        { cancelable: false }
+      );
+    } catch (error) {
+      setLoading(false); 
+      console.log(error);
+      if (error.code === 'auth/email-already-in-use') {
+        Alert.alert('Lỗi', 'Email đã được sử dụng');
+      } else if (error.code === 'auth/invalid-email') {
+        Alert.alert('Lỗi', 'Email không hợp lệ');
+      } else {
+        Alert.alert('Lỗi', 'Đăng ký thất bại, vui lòng thử lại');
+      }
+    }
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -34,10 +87,7 @@ const SignUpScreen = ({ navigation }) => {
       <Formik
         initialValues={{ name: '', email: '', password: '', confirmPassword: '' }}
         validationSchema={signUpSchema}
-        onSubmit={(values) => {
-          console.log('Đăng ký:', values);
-          // TODO: xử lý đăng ký Firebase hoặc API
-        }}
+        onSubmit={handleSignUp}
       >
         {({ handleChange, handleBlur, handleSubmit, values, errors, touched }) => (
           <>
@@ -117,11 +167,19 @@ const SignUpScreen = ({ navigation }) => {
             )}
 
             {/* Nút đăng ký */}
-            <TouchableOpacity style={styles.button} onPress={handleSubmit}>
-              <Text style={styles.buttonText}>Đăng Ký</Text>
+            <TouchableOpacity
+              style={styles.button}
+              onPress={handleSubmit}
+              disabled={loading} 
+            >
+              {loading ? (
+                <ActivityIndicator color="#fff" /> 
+              ) : (
+                <Text style={styles.buttonText}>Đăng Ký</Text>
+              )}
             </TouchableOpacity>
 
-            {/* Đã có tài khoản? Đăng nhập */}
+            {/* Đã có tài khoản */}
             <View style={styles.signupContainer}>
               <Text>Bạn đã có tài khoản?</Text>
               <TouchableOpacity onPress={() => navigation.navigate('Login')}>

@@ -11,22 +11,21 @@ import Icon from 'react-native-vector-icons/Ionicons';
 const PasswordResetSuccessScreen = ({ navigation }) => {
   return (
     <SafeAreaView style={styles.container}>
-      {/* Nút quay lại (tuỳ chọn) */}
       <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
         <Icon name="arrow-back" size={24} color="#000" />
       </TouchableOpacity>
 
-      {/* Icon dấu tích lớn */}
       <View style={styles.checkIcon}>
         <Icon name="checkmark-circle" size={250} color="#4A44F2" />
       </View>
 
-      {/* Nút trở về đăng nhập */}
+      <Text style={styles.successText}>Mật khẩu đã được thay đổi thành công!</Text>
+
       <TouchableOpacity
         style={styles.button}
-        onPress={() => navigation.navigate('Login')}
+        onPress={() => navigation.navigate('HomeTabs')}
       >
-        <Text style={styles.buttonText}>Quay về đăng nhập</Text>
+        <Text style={styles.buttonText}>Quay lại trang chủ</Text>
       </TouchableOpacity>
     </SafeAreaView>
   );
@@ -48,6 +47,13 @@ const styles = StyleSheet.create({
   },
   checkIcon: {
     alignItems: 'center',
+    marginBottom: 20,
+  },
+  successText: {
+    fontSize: 18,
+    fontWeight: '600',
+    textAlign: 'center',
+    color: '#4A44F2',
     marginBottom: 30,
   },
   button: {
