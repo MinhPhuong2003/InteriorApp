@@ -17,6 +17,7 @@ import CheckOutScreen from '../screens/CheckOutScreen';
 import VlogScreen from '../screens/VlogScreen';
 import ContactScreen from '../screens/ContactScreen';
 import HelpScreen from '../screens/HelpScreen';
+import UserChatScreen from '../screens/UserChatScreen';
 import AdminDashboardScreen from '../screens/admin/AdminDashboardScreen';
 import AdminProductScreen from '../screens/admin/AdminProductScreen';
 import AdminOrderScreen from '../screens/admin/AdminOrderScreen';
@@ -27,6 +28,10 @@ import EditProductScreen from '../screens/admin/EditProductScreen';
 import ProductDetailAdminScreen from '../screens/admin/ProductDetailAdminScreen';
 import AdminCategoryScreen from '../screens/admin/AdminCategoryScreen';
 import AddCategoryScreen from '../screens/admin/AddCategoryScreen';
+import CategoryDetailScreen from '../screens/admin/CategoryDetailScreen';
+import EditCategoryScreen from '../screens/admin/EditCategoryScreen';
+import AdminChatScreen from '../screens/admin/AdminChatScreen';
+import AdminChatDetailScreen from '../screens/admin/AdminChatDetailScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -59,6 +64,11 @@ const AppNavigator = () => (
     <Stack.Screen name="ProductDetailAdmin" component={ProductDetailAdminScreen} />
     <Stack.Screen name="AdminCategory" component={AdminCategoryScreen} />
     <Stack.Screen name="AddCategory" component={AddCategoryScreen} />
+    <Stack.Screen name="EditCategory" component={EditCategoryScreen} />
+    <Stack.Screen name="CategoryDetail" component={CategoryDetailScreen} />
+    <Stack.Screen name="AdminChat" component={AdminChatScreen} />
+    <Stack.Screen name="UserChat" component={UserChatScreen} />
+    <Stack.Screen name="AdminChatDetail" component={AdminChatDetailScreen} />
   </Stack.Navigator>
 );
 

@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import {
   View,
   Text,
@@ -11,72 +11,28 @@ import {
 } from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-
-const interiorDesigns = [
-  {
-    id: '1',
-    name: 'Phòng khách hiện đại',
-    image: require('../assets/nhamau1.jpg'),
-    detail: 'Không gian mở với tông màu trung tính và nội thất tối giản.',
-  },
-  {
-    id: '2',
-    name: 'Phòng ngủ tối giản',
-    image: require('../assets/nhamau2.jpg'),
-    detail: 'Thiết kế nhẹ nhàng với ánh sáng tự nhiên và vật liệu thân thiện.',
-  },
-  {
-    id: '3',
-    name: 'Phòng bếp cổ điển',
-    image: require('../assets/nhamau2.jpg'),
-    detail: 'Thiết kế nhẹ nhàng với ánh sáng tự nhiên và vật liệu thân thiện.',
-  },
-  {
-    id: '4',
-    name: 'Phòng khách cổ điển',
-    image: require('../assets/nhamau2.jpg'),
-    detail: 'Thiết kế nhẹ nhàng với ánh sáng tự nhiên và vật liệu thân thiện.',
-  },
-];
-
-const houseDesigns = [
-  {
-    id: '5',
-    name: 'Bếp Bắc Âu',
-    image: require('../assets/nhamau1.jpg'),
-    detail: 'Phong cách Bắc Âu nhẹ nhàng, gỗ sáng màu, kết hợp với nội thất trắng.',
-  },
-  {
-    id: '6',
-    name: 'Văn phòng sang trọng',
-    image: require('../assets/nhamau1.jpg'),
-    detail: 'Không gian làm việc chuyên nghiệp, kết hợp giữa ánh sáng vàng và vật liệu gỗ.',
-  },
-  {
-    id: '7',
-    name: 'Phòng trẻ em năng động',
-    image: require('../assets/nhamau1.jpg'),
-    detail: 'Màu sắc tươi sáng, có khu vui chơi và góc học tập cho trẻ.',
-  },
-  {
-    id: '8',
-    name: '2 phòng ngủ',
-    image: require('../assets/nhamau1.jpg'),
-    detail: 'Màu sắc tươi sáng, có khu vui chơi và góc học tập cho trẻ.',
-  },
-];
+import firestore from '@react-native-firebase/firestore';
 
 const InteriorScreen = () => {
   const navigation = useNavigation();
   const [category, setCategory] = useState('interior');
-  const [selectedTitle, setSelectedTitle] = useState(null);
+  const [designs, setDesigns] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedTitle, setSelectedTitle] = useState(null);
 
-  const designs = category === 'interior' ? interiorDesigns : houseDesigns;
-
-  const filteredDesigns = designs.filter(item =>
-    item.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  useEffect(() => {
+    const unsubscribe = firestore()
+      .collection('categories')
+      .orderBy('createdAt', 'desc')
+      .onSnapshot(snapshot => {
+        const data = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        setDesigns(data);
+      });
+    return () => unsubscribe();
+  }, []);
 
   useFocusEffect(
     useCallback(() => {
@@ -84,19 +40,26 @@ const InteriorScreen = () => {
     }, [])
   );
 
+  const filteredDesigns = designs
+    .filter(item => item.type === category)
+    .filter(item => item.name.toLowerCase().includes(searchQuery.toLowerCase()));
+
   const renderItem = ({ item }) => (
     <TouchableOpacity
       style={styles.itemContainer}
       onPress={() => {
         setSelectedTitle(item.name);
         navigation.navigate('InteriorDetail', {
-          image: item.image,
+          image: item.image, 
           name: item.name,
-          detail: item.detail,
+          detail: item.detail || 'Không có mô tả chi tiết',
         });
       }}
     >
-      <Image source={item.image} style={styles.image} />
+      <Image
+        source={item.image ? { uri: item.image } : require('../assets/nhamau1.jpg')}
+        style={styles.image}
+      />
       <Text style={styles.name}>{item.name}</Text>
     </TouchableOpacity>
   );
@@ -119,7 +82,7 @@ const InteriorScreen = () => {
         />
       </View>
 
-      {/* Tip design */}
+      {/* Tip */}
       <View style={styles.tipBox}>
         <Text style={styles.tipText}>
           💡 Mẹo: Ưu tiên sử dụng ánh sáng tự nhiên và màu trung tính để làm nổi bật nội thất!
@@ -149,14 +112,14 @@ const InteriorScreen = () => {
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
-          style={[styles.tab, category === 'house' && styles.activeTab]}
+          style={[styles.tab, category === 'model' && styles.activeTab]}
           onPress={() => {
-            setCategory('house');
+            setCategory('model');
             setSelectedTitle(null);
             setSearchQuery('');
           }}
         >
-          <Text style={category === 'house' ? styles.activeTabText : styles.tabText}>
+          <Text style={category === 'model' ? styles.activeTabText : styles.tabText}>
             Thiết kế nhà mẫu
           </Text>
         </TouchableOpacity>
@@ -167,7 +130,7 @@ const InteriorScreen = () => {
         data={filteredDesigns}
         numColumns={2}
         renderItem={renderItem}
-        keyExtractor={(item) => item.id}
+        keyExtractor={item => item.id}
         contentContainerStyle={styles.list}
       />
     </View>
@@ -179,7 +142,6 @@ const itemWidth = width / 2 - 20;
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#fff' },
-
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -190,15 +152,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     height: 50,
   },
-  searchIcon: {
-    marginRight: 8,
-  },
-  searchInput: {
-    flex: 1,
-    fontSize: 14,
-    color: '#333',
-  },
-
+  searchIcon: { marginRight: 8 },
+  searchInput: { flex: 1, fontSize: 14, color: '#333' },
   tipBox: {
     backgroundColor: '#e7f5f1',
     marginHorizontal: 10,
@@ -208,12 +163,7 @@ const styles = StyleSheet.create({
     borderLeftWidth: 5,
     borderLeftColor: '#2D6B60',
   },
-  tipText: {
-    fontSize: 13,
-    color: '#2D6B60',
-    fontStyle: 'italic',
-  },
-
+  tipText: { fontSize: 13, color: '#2D6B60', fontStyle: 'italic' },
   headerTitle: {
     fontSize: 20,
     fontWeight: '700',
@@ -230,7 +180,6 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     paddingHorizontal: 20,
   },
-
   tabContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
@@ -243,18 +192,9 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     backgroundColor: '#eee',
   },
-  activeTab: {
-    backgroundColor: '#2D6B60',
-  },
-  tabText: {
-    color: '#555',
-    fontWeight: '500',
-  },
-  activeTabText: {
-    color: '#fff',
-    fontWeight: '600',
-  },
-
+  activeTab: { backgroundColor: '#2D6B60' },
+  tabText: { color: '#555', fontWeight: '500' },
+  activeTabText: { color: '#fff', fontWeight: '600' },
   list: { padding: 10 },
   itemContainer: {
     width: itemWidth,
@@ -265,18 +205,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     elevation: 3,
   },
-  image: {
-    width: '100%',
-    height: 120,
-    borderRadius: 8,
-    resizeMode: 'cover',
-  },
-  name: {
-    marginTop: 8,
-    fontSize: 14,
-    fontWeight: '600',
-    textAlign: 'center',
-  },
+  image: { width: '100%', height: 120, borderRadius: 8, resizeMode: 'cover' },
+  name: { marginTop: 8, fontSize: 14, fontWeight: '600', textAlign: 'center' },
 });
 
 export default InteriorScreen;

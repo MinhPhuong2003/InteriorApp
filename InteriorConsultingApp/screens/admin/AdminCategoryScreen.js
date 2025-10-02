@@ -6,8 +6,6 @@ import {
   FlatList,
   TouchableOpacity,
   Alert,
-  Modal,
-  TextInput,
   Image,
 } from "react-native";
 import Ionicons from "react-native-vector-icons/Ionicons";
@@ -15,9 +13,6 @@ import firestore from "@react-native-firebase/firestore";
 
 const AdminCategoryScreen = ({ navigation }) => {
   const [categories, setCategories] = useState([]);
-  const [modalVisible, setModalVisible] = useState(false);
-  const [editingCategory, setEditingCategory] = useState(null);
-  const [categoryName, setCategoryName] = useState("");
 
   useEffect(() => {
     const unsubscribe = firestore()
@@ -34,63 +29,16 @@ const AdminCategoryScreen = ({ navigation }) => {
     return () => unsubscribe();
   }, []);
 
-  const handleSave = async () => {
-    if (!categoryName.trim()) {
-      Alert.alert("Thông báo", "Tên danh mục không được để trống");
-      return;
-    }
-
-    try {
-      if (editingCategory) {
-        await firestore()
-          .collection("categories")
-          .doc(editingCategory.id)
-          .update({ name: categoryName });
-        Alert.alert("Thành công", "Đã cập nhật danh mục");
-      } else {
-        await firestore().collection("categories").add({
-          name: categoryName,
-          createdAt: firestore.FieldValue.serverTimestamp(),
-        });
-        Alert.alert("Thành công", "Đã thêm danh mục mới");
-      }
-      setModalVisible(false);
-      setCategoryName("");
-      setEditingCategory(null);
-    } catch (error) {
-      console.error(error);
-      Alert.alert("Lỗi", "Không thể lưu danh mục");
-    }
-  };
-
-  const handleDelete = (id) => {
-    Alert.alert("Xác nhận", "Bạn có chắc muốn xóa danh mục này?", [
-      { text: "Hủy", style: "cancel" },
-      {
-        text: "Xóa",
-        style: "destructive",
-        onPress: async () => {
-          try {
-            await firestore().collection("categories").doc(id).delete();
-            Alert.alert("Thành công", "Đã xóa danh mục");
-          } catch (error) {
-            console.error(error);
-            Alert.alert("Lỗi", "Không thể xóa danh mục");
-          }
+  const handleDelete = item => {
+      Alert.alert('Xác nhận', `Bạn chắc chắn muốn xóa "${item.name}"?`, [
+        { text: 'Hủy' },
+        {
+          text: 'Xóa',
+          onPress: async () => {
+            await firestore().collection('categories').doc(item.id).delete();
+          },
         },
-      },
-    ]);
-  };
-
-  const openModal = (category) => {
-    if (category) {
-      setEditingCategory(category);
-      setCategoryName(category.name);
-    } else {
-      setEditingCategory(null);
-      setCategoryName("");
-    }
-    setModalVisible(true);
+      ]);
   };
 
   const renderItem = ({ item }) => (
@@ -121,11 +69,17 @@ const AdminCategoryScreen = ({ navigation }) => {
       </View>
 
       <View style={styles.actions}>
-        <TouchableOpacity onPress={() => openModal(item)} style={styles.actionButton}>
+        {/* Sửa → chuyển sang EditCategoryScreen */}
+        <TouchableOpacity
+          onPress={() => navigation.navigate("EditCategory", { category: item })}
+          style={styles.actionButton}
+        >
           <Ionicons name="create-outline" size={20} color="#4A90E2" />
         </TouchableOpacity>
+
+        {/* Xóa */}
         <TouchableOpacity
-          onPress={() => handleDelete(item.id)}
+          onPress={() => handleDelete(item)}
           style={styles.actionButton}
         >
           <Ionicons name="trash-outline" size={20} color="#E53935" />
@@ -158,36 +112,6 @@ const AdminCategoryScreen = ({ navigation }) => {
         keyExtractor={(item) => item.id}
         contentContainerStyle={{ paddingBottom: 20 }}
       />
-
-      <Modal visible={modalVisible} animationType="slide" transparent>
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>
-              {editingCategory ? "Sửa danh mục" : "Thêm danh mục mới"}
-            </Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Nhập tên danh mục"
-              value={categoryName}
-              onChangeText={setCategoryName}
-            />
-            <View style={styles.modalActions}>
-              <TouchableOpacity
-                style={[styles.modalButton, { backgroundColor: "#4A90E2" }]}
-                onPress={handleSave}
-              >
-                <Text style={styles.modalButtonText}>Lưu</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.modalButton, { backgroundColor: "#aaa" }]}
-                onPress={() => setModalVisible(false)}
-              >
-                <Text style={styles.modalButtonText}>Hủy</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </Modal>
     </View>
   );
 };
@@ -230,34 +154,4 @@ const styles = StyleSheet.create({
   },
   actions: { flexDirection: "row" },
   actionButton: { marginLeft: 10 },
-
-  modalOverlay: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "rgba(0,0,0,0.5)",
-  },
-  modalContent: {
-    width: "85%",
-    backgroundColor: "#fff",
-    borderRadius: 10,
-    padding: 20,
-  },
-  modalTitle: { fontSize: 18, fontWeight: "bold", marginBottom: 12 },
-  input: {
-    borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 8,
-    padding: 10,
-    marginBottom: 16,
-  },
-  modalActions: { flexDirection: "row", justifyContent: "space-between" },
-  modalButton: {
-    flex: 1,
-    padding: 12,
-    borderRadius: 8,
-    marginHorizontal: 4,
-    alignItems: "center",
-  },
-  modalButtonText: { color: "#fff", fontSize: 16, fontWeight: "600" },
 });

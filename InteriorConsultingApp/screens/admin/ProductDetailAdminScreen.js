@@ -26,9 +26,10 @@ const ProductDetailAdminScreen = ({ navigation, route }) => {
 
   const handleDelete = () => {
     Alert.alert('Xác nhận', `Bạn chắc chắn muốn xóa "${currentProduct.name}"?`, [
-      { text: 'Hủy' },
+      { text: 'Hủy', style: 'cancel' },
       {
         text: 'Xóa',
+        style: 'destructive',
         onPress: async () => {
           await firestore().collection('products').doc(currentProduct.id).delete();
           navigation.goBack();
@@ -40,58 +41,61 @@ const ProductDetailAdminScreen = ({ navigation, route }) => {
   if (!currentProduct) return null;
 
   return (
-    <ScrollView style={styles.container}>
-      {/* Header */}
-      <View style={styles.headerRow}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-          <Icon name="arrow-back" size={24} color="#333" />
-        </TouchableOpacity>
-        <Text style={styles.header}>Chi tiết sản phẩm</Text>
-        <View style={{ width: 40 }} />
-      </View>
-
-      {/* Hình ảnh */}
-      <Image source={{ uri: currentProduct.image }} style={styles.image} />
-
-      {/* Thông tin sản phẩm */}
-      <View style={styles.infoContainer}>
-        <View style={styles.row}>
-          <Text style={styles.label}>Tên sản phẩm:</Text>
-          <Text style={styles.value}>{currentProduct.name}</Text>
+    <View style={styles.container}>
+      <ScrollView style={{ flex: 1 }}>
+        {/* Header */}
+        <View style={styles.headerRow}>
+          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+            <Icon name="arrow-back" size={24} color="#333" />
+          </TouchableOpacity>
+          <Text style={styles.header}>Chi tiết sản phẩm</Text>
+          <View style={{ width: 40 }} />
         </View>
 
-        <View style={styles.row}>
-          <Text style={styles.label}>Giá bán:</Text>
-          <Text style={styles.value}>{currentProduct.price?.toLocaleString()} đ</Text>
-        </View>
+        {/* Hình ảnh */}
+        <Image source={{ uri: currentProduct.image }} style={styles.image} />
 
-        <View style={styles.row}>
-          <Text style={styles.label}>Mô tả:</Text>
-          <Text style={styles.value}>{currentProduct.description || 'Chưa có mô tả'}</Text>
-        </View>
+        {/* Thông tin sản phẩm */}
+        <View style={styles.infoContainer}>
+          <View style={styles.row}>
+            <Text style={styles.label}>Tên sản phẩm:</Text>
+            <Text style={styles.value}>{currentProduct.name}</Text>
+          </View>
 
-        <View style={styles.row}>
-          <Text style={styles.label}>Ngày thêm:</Text>
-          <Text style={styles.value}>
-            {currentProduct.createdAt?.toDate
-              ? currentProduct.createdAt.toDate().toLocaleString()
-              : 'N/A'}
-          </Text>
-        </View>
-      </View>
+          <View style={styles.row}>
+            <Text style={styles.label}>Giá bán:</Text>
+            <Text style={styles.value}>{currentProduct.price?.toLocaleString()} đ</Text>
+          </View>
 
-      {/* Nút Sửa / Xóa */}
-      <View style={styles.actions}>
-        <TouchableOpacity style={styles.editButton} onPress={handleEdit}>
+          <View style={styles.row}>
+            <Text style={styles.label}>Mô tả:</Text>
+            <Text style={styles.value}>{currentProduct.description || 'Chưa có mô tả'}</Text>
+          </View>
+
+          <View style={styles.row}>
+            <Text style={styles.label}>Ngày thêm:</Text>
+            <Text style={styles.value}>
+              {currentProduct.createdAt?.toDate
+                ? currentProduct.createdAt.toDate().toLocaleString()
+                : 'N/A'}
+            </Text>
+          </View>
+        </View>
+      </ScrollView>
+
+      {/* Nút Sửa / Xóa đặt dưới cùng */}
+      <View style={styles.buttonRow}>
+        <TouchableOpacity style={[styles.actionButton, { backgroundColor: '#4A90E2' }]} onPress={handleEdit}>
           <Icon name="create-outline" size={20} color="#fff" />
-          <Text style={styles.buttonText}>Sửa</Text>
+          <Text style={styles.actionText}>Sửa</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.deleteButton} onPress={handleDelete}>
+
+        <TouchableOpacity style={[styles.actionButton, { backgroundColor: '#E53935' }]} onPress={handleDelete}>
           <Icon name="trash-outline" size={20} color="#fff" />
-          <Text style={styles.buttonText}>Xóa</Text>
+          <Text style={styles.actionText}>Xóa</Text>
         </TouchableOpacity>
       </View>
-    </ScrollView>
+    </View>
   );
 };
 
@@ -128,26 +132,25 @@ const styles = StyleSheet.create({
   },
   label: { fontSize: 16, fontWeight: '600', color: '#333', marginRight: 6 },
   value: { fontSize: 16, color: '#555', flexShrink: 1 },
-  actions: {
+  buttonRow: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
-    marginVertical: 20,
+    justifyContent: 'space-between',
+    padding: 16,
+    borderTopWidth: 1,
+    borderTopColor: '#eee',
   },
-  editButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#4A44F2',
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-    borderRadius: 8,
-  },
-  deleteButton: {
+  actionButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F24444',
-    paddingHorizontal: 20,
-    paddingVertical: 12,
+    padding: 14,
     borderRadius: 8,
+    flex: 0.48,
+    justifyContent: 'center',
   },
-  buttonText: { color: '#fff', fontSize: 16, fontWeight: '600', marginLeft: 6 },
+  actionText: {
+    color: '#fff',
+    fontSize: 16,
+    marginLeft: 6,
+    fontWeight: '600',
+  },
 });

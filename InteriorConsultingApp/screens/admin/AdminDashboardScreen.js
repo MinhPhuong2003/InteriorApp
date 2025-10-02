@@ -64,7 +64,6 @@ const AdminDashboardScreen = ({ navigation }) => {
         </View>
       </TouchableOpacity>
 
-      {/* Mục mới */}
       <TouchableOpacity style={styles.card} onPress={() => navigation.navigate('AdminCategory')}>
         <View style={styles.row}>
           <Icon name="albums-outline" size={20} color="#4A44F2" />
@@ -93,6 +92,15 @@ const AdminDashboardScreen = ({ navigation }) => {
         </View>
       </TouchableOpacity>
 
+      {/* Mới: Chat realtime */}
+      <TouchableOpacity style={styles.card} onPress={() => navigation.navigate('AdminChat')}>
+        <View style={styles.row}>
+          <Icon name="chatbubble-ellipses-outline" size={20} color="#4A44F2" />
+          <Text style={styles.cardText}>Chat trực tiếp với người dùng</Text>
+        </View>
+      </TouchableOpacity>
+
+      {/* Logout */}
       <TouchableOpacity style={styles.logout} onPress={() => navigation.replace('Login')}>
         <View style={styles.row}>
           <Icon name="log-out-outline" size={18} color="#E53935" />
@@ -146,6 +154,12 @@ const styles = StyleSheet.create({
     color: '#777',
     marginTop: 4,
   },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    marginBottom: 12,
+    color: '#4A4A4A',
+  },
   card: {
     backgroundColor: '#fff',
     padding: 16,
@@ -167,12 +181,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
     marginLeft: 8,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    marginBottom: 12,
-    color: '#4A4A4A',
   },
   row: {
     flexDirection: 'row',

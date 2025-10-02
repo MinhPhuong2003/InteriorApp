@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Icon from 'react-native-vector-icons/Ionicons';
 import HomeScreen from '../screens/HomeScreen';
-import AppointmentsScreen from '../screens/AppointmentsScreen';
+import BookingListScreen from '../screens/BookingListScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 import InteriorScreen from '../screens/InteriorScreen';
 import ProductScreen from '../screens/ProductScreen';
@@ -89,7 +89,7 @@ const MainTabs = ({ navigation }) => {
         />
         <Tab.Screen
           name="LỊCH HẸN"
-          component={AppointmentsScreen}
+          component={BookingListScreen}
           options={({ navigation }) => ({
             headerTitleAlign: 'center',
             headerLeft: renderHeaderLeft,

@@ -12,6 +12,8 @@ import {
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { launchImageLibrary } from 'react-native-image-picker';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import firestore from '@react-native-firebase/firestore';
+import auth from '@react-native-firebase/auth';
 
 const BookingScreen = ({ navigation }) => {
   const [date, setDate] = useState(new Date());
@@ -36,9 +38,30 @@ const BookingScreen = ({ navigation }) => {
     }
   };
 
-  const handleSubmit = () => {
-    console.log('Thông tin đặt lịch:', { date, notes, image });
-    Alert.alert('Thành công', 'Yêu cầu của bạn đã được gửi!');
+  const handleSubmit = async () => {
+    try {
+      const user = auth().currentUser;
+      if (!user) {
+        Alert.alert('Lỗi', 'Bạn cần đăng nhập để đặt lịch');
+        return;
+      }
+
+      await firestore().collection('bookings').add({
+        userId: user.uid,
+        date: date.toISOString(),
+        notes,
+        image,
+        status: 'Chờ xác nhận',
+        createdAt: firestore.FieldValue.serverTimestamp(),
+      });
+
+      Alert.alert('Thành công', 'Yêu cầu của bạn đã được gửi!', [
+        { text: 'OK', onPress: () => navigation.goBack() },
+      ]);
+    } catch (error) {
+      console.error(error);
+      Alert.alert('Lỗi', 'Không thể gửi yêu cầu');
+    }
   };
 
   return (

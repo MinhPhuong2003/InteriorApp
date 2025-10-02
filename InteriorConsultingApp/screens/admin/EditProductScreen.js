@@ -1,8 +1,22 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, StyleSheet, TouchableOpacity, Alert, Image, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
+import React, { useState } from 'react';
+import {
+  View,
+  Text,
+  TextInput,
+  StyleSheet,
+  TouchableOpacity,
+  Alert,
+  Image,
+  ScrollView,
+  KeyboardAvoidingView,
+  Platform,
+} from 'react-native';
 import firestore from '@react-native-firebase/firestore';
 import { launchImageLibrary } from 'react-native-image-picker';
 import Icon from 'react-native-vector-icons/Ionicons';
+import { Picker } from '@react-native-picker/picker';
+
+const categories = ['Giường', 'Tủ', 'Kệ TV', 'Tủ bếp', 'Bàn', 'Ghế'];
 
 const EditProductScreen = ({ route, navigation }) => {
   const { product } = route.params;
@@ -10,6 +24,7 @@ const EditProductScreen = ({ route, navigation }) => {
   const [price, setPrice] = useState(product.price.toString());
   const [image, setImage] = useState(product.image);
   const [description, setDescription] = useState(product.description || '');
+  const [category, setCategory] = useState(product.category || categories[0]);
 
   const selectImage = () => {
     launchImageLibrary({ mediaType: 'photo' }, response => {
@@ -37,6 +52,7 @@ const EditProductScreen = ({ route, navigation }) => {
         price: parseInt(price),
         image,
         description,
+        category,
       });
 
       Alert.alert('Thành công', 'Sản phẩm đã được cập nhật', [
@@ -81,6 +97,19 @@ const EditProductScreen = ({ route, navigation }) => {
           keyboardType="numeric"
         />
 
+        <Text style={styles.label}>Danh mục:</Text>
+        <View style={styles.pickerWrapper}>
+          <Picker
+            selectedValue={category}
+            onValueChange={setCategory}
+            style={{ height: 50, width: '100%' }}
+          >
+            {categories.map(c => (
+              <Picker.Item key={c} label={c} value={c} />
+            ))}
+          </Picker>
+        </View>
+
         <Text style={styles.label}>Mô tả:</Text>
         <TextInput
           style={[styles.input, { height: 100, textAlignVertical: 'top' }]}
@@ -93,7 +122,7 @@ const EditProductScreen = ({ route, navigation }) => {
         <Text style={styles.label}>Hình ảnh:</Text>
         <TouchableOpacity style={styles.imagePicker} onPress={selectImage}>
           <Image source={{ uri: image }} style={styles.image} />
-          <Text style={{ textAlign: 'center', marginTop: 5 }}>Thêm ảnh</Text>
+          <Text style={{ textAlign: 'center', marginTop: 5 }}>Chọn ảnh</Text>
         </TouchableOpacity>
       </ScrollView>
 
@@ -119,41 +148,14 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#ddd',
   },
-  backButton: {
-    width: 40,
-  },
-  header: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#333',
-  },
-  container: {
-    flex: 1,
-    padding: 20,
-  },
-  label: {
-    marginTop: 10,
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 8,
-    padding: 10,
-    marginTop: 5,
-  },
-  imagePicker: {
-    marginTop: 10,
-    alignItems: 'center',
-  },
-  image: {
-    width: 150,
-    height: 150,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#ccc',
-  },
+  backButton: { width: 40 },
+  header: { fontSize: 20, fontWeight: 'bold', color: '#333' },
+  container: { flex: 1, padding: 20 },
+  label: { marginTop: 10, fontSize: 16, fontWeight: 'bold' },
+  input: { borderWidth: 1, borderColor: '#ccc', borderRadius: 8, padding: 10, marginTop: 5 },
+  pickerWrapper: { borderWidth: 1, borderColor: '#ccc', borderRadius: 8, marginTop: 5 },
+  imagePicker: { marginTop: 10, alignItems: 'center' },
+  image: { width: 150, height: 150, borderRadius: 8, borderWidth: 1, borderColor: '#ccc' },
   footer: {
     position: 'absolute',
     bottom: 0,
@@ -164,14 +166,6 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: '#ddd',
   },
-  button: {
-    backgroundColor: '#28a745',
-    padding: 15,
-    borderRadius: 8,
-    alignItems: 'center',
-  },
-  buttonText: {
-    color: '#fff',
-    fontWeight: 'bold',
-  },
+  button: { backgroundColor: '#28a745', padding: 15, borderRadius: 8, alignItems: 'center' },
+  buttonText: { color: '#fff', fontWeight: 'bold' },
 });
