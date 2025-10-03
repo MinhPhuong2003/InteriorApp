@@ -50,9 +50,14 @@ const InteriorScreen = () => {
       onPress={() => {
         setSelectedTitle(item.name);
         navigation.navigate('InteriorDetail', {
-          image: item.image, 
+          id: item.id,
           name: item.name,
-          detail: item.detail || 'Không có mô tả chi tiết',
+          image: item.image,
+          description: item.description,
+          style: item.style,
+          usageRecommendation: item.usageRecommendation,
+          createdAt: item.createdAt,
+          type: item.type,
         });
       }}
     >
@@ -210,3 +215,4 @@ const styles = StyleSheet.create({
 });
 
 export default InteriorScreen;
+

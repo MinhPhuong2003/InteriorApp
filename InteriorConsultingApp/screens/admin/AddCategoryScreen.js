@@ -19,16 +19,17 @@ import { launchImageLibrary } from "react-native-image-picker";
 const AddCategoryScreen = ({ navigation }) => {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
-  const [price, setPrice] = useState("");
   const [type, setType] = useState("interior");
   const [image, setImage] = useState("https://via.placeholder.com/150");
+  const [style, setStyle] = useState("");
+  const [usageRecommendation, setUsageRecommendation] = useState("");
 
   const selectImage = () => {
     launchImageLibrary({ mediaType: "photo" }, (response) => {
       if (response.didCancel) {
-        console.log("User cancelled image picker");
+        console.log("Người dùng đã hủy chọn ảnh");
       } else if (response.errorCode) {
-        console.log("ImagePicker Error: ", response.errorMessage);
+        console.log("Lỗi ImagePicker: ", response.errorMessage);
         Alert.alert("Lỗi", "Không thể chọn hình ảnh");
       } else {
         const uri = response.assets[0].uri;
@@ -47,9 +48,10 @@ const AddCategoryScreen = ({ navigation }) => {
       await firestore().collection("categories").add({
         name,
         description,
-        price: parseFloat(price) || 0,
         type,
         image,
+        style,
+        usageRecommendation,
         createdAt: firestore.FieldValue.serverTimestamp(),
       });
 
@@ -109,15 +111,6 @@ const AddCategoryScreen = ({ navigation }) => {
           multiline
         />
 
-        <Text style={styles.label}>Giá:</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Nhập giá..."
-          value={price}
-          onChangeText={setPrice}
-          keyboardType="numeric"
-        />
-
         <Text style={styles.label}>Loại danh mục:</Text>
         <View style={styles.pickerWrapper}>
           <Picker
@@ -128,6 +121,24 @@ const AddCategoryScreen = ({ navigation }) => {
             <Picker.Item label="Nhà mẫu" value="model" />
           </Picker>
         </View>
+
+        <Text style={styles.label}>Phong cách thiết kế:</Text>
+        <TextInput
+          style={[styles.input, { height: 80, textAlignVertical: "top" }]}
+          placeholder="Nhập phong cách (ví dụ: Minimalism, Scandinavian)..."
+          value={style}
+          onChangeText={setStyle}
+          multiline
+        />
+
+        <Text style={styles.label}>Khuyến nghị sử dụng:</Text>
+        <TextInput
+          style={[styles.input, { height: 80, textAlignVertical: "top" }]}
+          placeholder="Nhập khuyến nghị sử dụng..."
+          value={usageRecommendation}
+          onChangeText={setUsageRecommendation}
+          multiline
+        />
 
         <Text style={styles.label}>Hình ảnh:</Text>
         <TouchableOpacity style={styles.imagePicker} onPress={selectImage}>

@@ -32,17 +32,6 @@ const SettingsModal = ({ visible, onClose }) => {
             <Ionicons name="lock-closed-outline" size={20} style={styles.icon} />
             <Text style={styles.label}>Đổi mật khẩu</Text>
           </TouchableOpacity>
-
-          {/* Dark Mode */}
-          <View style={styles.option}>
-            <Ionicons name="moon-outline" size={20} style={styles.icon} />
-            <Text style={styles.label}>Dark Mode</Text>
-            <Switch
-              value={isDarkMode}
-              onValueChange={(val) => setIsDarkMode(val)}
-              style={{ marginLeft: 'auto' }}
-            />
-          </View>
         </View>
       </TouchableOpacity>
     </Modal>

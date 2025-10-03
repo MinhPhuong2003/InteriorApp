@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet, Image, TouchableOpacity, Alert, ActivityIndicator } from "react-native";
+import { View, Text, StyleSheet, Image, TouchableOpacity, Alert, ActivityIndicator, ScrollView } from "react-native";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import firestore from "@react-native-firebase/firestore";
 
@@ -14,7 +14,12 @@ const CategoryDetailScreen = ({ route, navigation }) => {
       .onSnapshot((doc) => {
         if (doc.exists) {
           setCategoryData({ id: doc.id, ...doc.data() });
+          console.log("Dữ liệu chi tiết từ Firestore:", { id: doc.id, ...doc.data() });
+        } else {
+          console.log("Tài liệu không tồn tại");
         }
+      }, (error) => {
+        console.error("Lỗi khi lấy dữ liệu chi tiết:", error);
       });
 
     return () => unsubscribe();
@@ -54,7 +59,7 @@ const CategoryDetailScreen = ({ route, navigation }) => {
   }
 
   return (
-    <View style={styles.container}>
+    <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
       {/* Nội dung chi tiết */}
       <View style={{ flex: 1 }}>
         {/* Header */}
@@ -74,24 +79,48 @@ const CategoryDetailScreen = ({ route, navigation }) => {
 
         {/* Thông tin */}
         <Text style={styles.label}>Tên danh mục:</Text>
-        <Text style={styles.value}>{categoryData.name}</Text>
+        <Text style={styles.value}>{categoryData.name || "Chưa có tên"}</Text>
 
         {categoryData.description ? (
           <>
             <Text style={styles.label}>Mô tả:</Text>
             <Text style={styles.value}>{categoryData.description}</Text>
           </>
-        ) : null}
-
-        <Text style={styles.label}>Giá:</Text>
-        <Text style={styles.value}>
-          {categoryData.price ? `${categoryData.price.toLocaleString()} đ` : "Chưa có"}
-        </Text>
+        ) : (
+          <>
+            <Text style={styles.label}>Mô tả:</Text>
+            <Text style={styles.value}>Chưa có</Text>
+          </>
+        )}
 
         <Text style={styles.label}>Loại:</Text>
         <Text style={styles.value}>
           {categoryData.type === "interior" ? "Nội thất" : "Nhà mẫu"}
         </Text>
+
+        {categoryData.style ? (
+          <>
+            <Text style={styles.label}>Phong cách thiết kế:</Text>
+            <Text style={styles.value}>{categoryData.style}</Text>
+          </>
+        ) : (
+          <>
+            <Text style={styles.label}>Phong cách thiết kế:</Text>
+            <Text style={styles.value}>Chưa có</Text>
+          </>
+        )}
+
+        {categoryData.usageRecommendation ? (
+          <>
+            <Text style={styles.label}>Khuyến nghị sử dụng:</Text>
+            <Text style={styles.value}>{categoryData.usageRecommendation}</Text>
+          </>
+        ) : (
+          <>
+            <Text style={styles.label}>Khuyến nghị sử dụng:</Text>
+            <Text style={styles.value}>Chưa có</Text>
+          </>
+        )}
       </View>
 
       {/* Nút hành động */}
@@ -112,7 +141,7 @@ const CategoryDetailScreen = ({ route, navigation }) => {
           <Text style={styles.actionText}>Xóa</Text>
         </TouchableOpacity>
       </View>
-    </View>
+    </ScrollView>
   );
 };
 
@@ -120,6 +149,7 @@ export default CategoryDetailScreen;
 
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 20, backgroundColor: "#fff" },
+  contentContainer: { flexGrow: 1, paddingBottom: 20 },
   headerRow: {
     flexDirection: "row",
     alignItems: "center",
@@ -135,11 +165,12 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   label: { fontSize: 16, fontWeight: "bold", marginTop: 10, color: "#333" },
-  value: { fontSize: 15, color: "#555", marginTop: 4 },
+  value: { fontSize: 15, color: "#555", marginTop: 4, textAlign: "justify" },
   buttonRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     marginTop: 20,
+    marginBottom: 20,
   },
   actionButton: {
     flexDirection: "row",

@@ -21,16 +21,17 @@ const EditCategoryScreen = ({ route, navigation }) => {
 
   const [name, setName] = useState(category.name || "");
   const [description, setDescription] = useState(category.description || "");
-  const [price, setPrice] = useState(category.price ? String(category.price) : "");
   const [type, setType] = useState(category.type || "interior");
   const [image, setImage] = useState(category.image || "");
+  const [style, setStyle] = useState(category.style || ""); // Thêm trường phong cách
+  const [usageRecommendation, setUsageRecommendation] = useState(category.usageRecommendation || ""); // Thêm trường khuyến nghị sử dụng
 
   const selectImage = () => {
     launchImageLibrary({ mediaType: "photo" }, (response) => {
       if (response.didCancel) {
-        console.log("User cancelled image picker");
+        console.log("Người dùng đã hủy chọn ảnh");
       } else if (response.errorCode) {
-        console.log("ImagePicker Error: ", response.errorMessage);
+        console.log("Lỗi ImagePicker: ", response.errorMessage);
         Alert.alert("Lỗi", "Không thể chọn hình ảnh");
       } else {
         const uri = response.assets[0].uri;
@@ -40,7 +41,7 @@ const EditCategoryScreen = ({ route, navigation }) => {
   };
 
   const handleUpdateCategory = async () => {
-    if (!name || !price || !type) {
+    if (!name) {
       Alert.alert("Lỗi", "Vui lòng nhập đầy đủ thông tin danh mục");
       return;
     }
@@ -49,9 +50,10 @@ const EditCategoryScreen = ({ route, navigation }) => {
       await firestore().collection("categories").doc(category.id).update({
         name,
         description,
-        price: price ? parseFloat(price) : null,
         type,
         image,
+        style, // Cập nhật phong cách thiết kế
+        usageRecommendation, // Cập nhật khuyến nghị sử dụng
       });
 
       Alert.alert("Thành công", "Danh mục đã được cập nhật", [
@@ -97,24 +99,36 @@ const EditCategoryScreen = ({ route, navigation }) => {
           multiline
         />
 
-        {/* Giá */}
-        <Text style={styles.label}>Giá:</Text>
-        <TextInput
-          style={styles.input}
-          value={price}
-          onChangeText={setPrice}
-          placeholder="Nhập giá"
-          keyboardType="numeric"
-        />
-
         {/* Loại */}
         <Text style={styles.label}>Loại:</Text>
         <View style={styles.pickerContainer}>
           <Picker selectedValue={type} onValueChange={(val) => setType(val)} style={{ flex: 1 }}>
-            <Picker.Item label="Interior" value="interior" />
-            <Picker.Item label="Model" value="model" />
+            <Picker.Item label="Thiết kế nội thất" value="interior" />
+            <Picker.Item label="Nhà mẫu" value="model" />
           </Picker>
         </View>
+
+        {/* Phong cách thiết kế */}
+        <View style={{ marginTop: 10 }}>
+        <Text style={styles.label}>Phong cách thiết kế:</Text>
+        <TextInput
+          style={[styles.input, { height: 100, textAlignVertical: "top" }]}
+          value={style}
+          onChangeText={setStyle}
+          placeholder="Nhập phong cách (ví dụ: Minimalism, Scandinavian)..."
+          multiline
+        />
+      </View>
+
+        {/* Khuyến nghị sử dụng */}
+        <Text style={styles.label}>Khuyến nghị sử dụng:</Text>
+        <TextInput
+          style={[styles.input, { height: 100, textAlignVertical: "top" }]}
+          value={usageRecommendation}
+          onChangeText={setUsageRecommendation}
+          placeholder="Nhập khuyến nghị sử dụng..."
+          multiline
+        />
 
         {/* Hình ảnh */}
         <Text style={styles.label}>Hình ảnh:</Text>

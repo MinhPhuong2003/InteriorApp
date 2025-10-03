@@ -91,9 +91,14 @@ const HomeScreen = () => {
           style={styles.designItem}
           onPress={() =>
             navigation.navigate('InteriorDetail', {
+              id: item.id,
               name: item.name,
               image: item.image,
-              detail: item.detail || 'Không có mô tả chi tiết',
+              description: item.description,
+              style: item.style,
+              usageRecommendation: item.usageRecommendation,
+              createdAt: item.createdAt,
+              type: item.type,
             })
           }
         >

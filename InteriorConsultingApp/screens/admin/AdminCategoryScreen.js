@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import {
   View,
   Text,
@@ -10,11 +10,12 @@ import {
 } from "react-native";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import firestore from "@react-native-firebase/firestore";
+import { useFocusEffect } from "@react-navigation/native";
 
 const AdminCategoryScreen = ({ navigation }) => {
   const [categories, setCategories] = useState([]);
 
-  useEffect(() => {
+  const fetchCategories = useCallback(() => {
     const unsubscribe = firestore()
       .collection("categories")
       .orderBy("createdAt", "desc")
@@ -23,22 +24,31 @@ const AdminCategoryScreen = ({ navigation }) => {
           id: doc.id,
           ...doc.data(),
         }));
+        console.log("Dữ liệu từ Firestore:", data);
         setCategories(data);
+      }, (error) => {
+        console.error("Lỗi khi lấy dữ liệu từ Firestore:", error);
       });
 
     return () => unsubscribe();
   }, []);
 
-  const handleDelete = item => {
-      Alert.alert('Xác nhận', `Bạn chắc chắn muốn xóa "${item.name}"?`, [
-        { text: 'Hủy' },
-        {
-          text: 'Xóa',
-          onPress: async () => {
-            await firestore().collection('categories').doc(item.id).delete();
-          },
+  useFocusEffect(
+    useCallback(() => {
+      fetchCategories();
+    }, [fetchCategories])
+  );
+
+  const handleDelete = (item) => {
+    Alert.alert("Xác nhận", `Bạn chắc chắn muốn xóa "${item.name}"?`, [
+      { text: "Hủy" },
+      {
+        text: "Xóa",
+        onPress: async () => {
+          await firestore().collection("categories").doc(item.id).delete();
         },
-      ]);
+      },
+    ]);
   };
 
   const renderItem = ({ item }) => (
@@ -53,19 +63,32 @@ const AdminCategoryScreen = ({ navigation }) => {
 
       <View style={{ flex: 1, marginLeft: 12 }}>
         <Text style={styles.categoryText} numberOfLines={1} ellipsizeMode="tail">
-          Tên: {item.name}
+          Tên: {item.name || "Chưa có tên"}
         </Text>
         {item.description ? (
           <Text style={styles.categoryText} numberOfLines={1} ellipsizeMode="tail">
             Mô tả: {item.description}
           </Text>
-        ) : null}
-        <Text style={styles.categoryText}>
-          Giá: {item.price ? `${item.price.toLocaleString()} đ` : "Chưa có"}
-        </Text>
+        ) : (
+          <Text style={styles.categoryText}>Mô tả: Chưa có</Text>
+        )}
         <Text style={styles.categoryText}>
           Loại: {item.type === "interior" ? "Nội thất" : "Nhà mẫu"}
         </Text>
+        {item.style ? (
+          <Text style={styles.categoryText} numberOfLines={1} ellipsizeMode="tail">
+            Phong cách: {item.style}
+          </Text>
+        ) : (
+          <Text style={styles.categoryText}>Phong cách: Chưa có</Text>
+        )}
+        {item.usageRecommendation ? (
+          <Text style={styles.categoryText} numberOfLines={1} ellipsizeMode="tail">
+            Khuyến nghị: {item.usageRecommendation}
+          </Text>
+        ) : (
+          <Text style={styles.categoryText}>Khuyến nghị: Chưa có</Text>
+        )}
       </View>
 
       <View style={styles.actions}>
@@ -111,6 +134,7 @@ const AdminCategoryScreen = ({ navigation }) => {
         renderItem={renderItem}
         keyExtractor={(item) => item.id}
         contentContainerStyle={{ paddingBottom: 20 }}
+        style={styles.list}
       />
     </View>
   );
@@ -154,4 +178,5 @@ const styles = StyleSheet.create({
   },
   actions: { flexDirection: "row" },
   actionButton: { marginLeft: 10 },
+  list: { flex: 1 },
 });
