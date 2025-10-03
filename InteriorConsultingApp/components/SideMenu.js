@@ -8,14 +8,37 @@ import {
   Animated,
   Pressable,
   Image,
+  ActivityIndicator,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useNavigation } from '@react-navigation/native';
+import firestore from '@react-native-firebase/firestore';
+import auth from '@react-native-firebase/auth';
 
 const SideMenu = ({ visible, onClose }) => {
   const navigation = useNavigation();
   const slideAnim = useRef(new Animated.Value(-250)).current;
   const [isMounted, setIsMounted] = useState(visible);
+  const [userData, setUserData] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const currentUser = auth().currentUser;
+    if (currentUser) {
+      const unsubscribe = firestore()
+        .collection('users')
+        .doc(currentUser.uid)
+        .onSnapshot(doc => {
+          if (doc.exists) {
+            setUserData(doc.data());
+          }
+          setLoading(false);
+        });
+      return () => unsubscribe();
+    } else {
+      setLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
     if (visible) {
@@ -73,11 +96,23 @@ const SideMenu = ({ visible, onClose }) => {
           style={[styles.menu, { transform: [{ translateX: slideAnim }] }]}
         >
           <View style={styles.userInfo}>
-            <Image
-              source={require('../assets/logo.png')}
-              style={styles.avatar}
-            />
-            <Text style={styles.userName}>Võ Lê Minh Phương</Text>
+            {loading ? (
+              <ActivityIndicator size="small" color="#3498db" />
+            ) : (
+              <>
+                <Image
+                  source={
+                    userData?.avatar
+                      ? { uri: userData.avatar }
+                      : require('../assets/logo.png')
+                  }
+                  style={styles.avatar}
+                />
+                <Text style={styles.userName}>
+                  {userData?.name || 'Người dùng'}
+                </Text>
+              </>
+            )}
           </View>
 
           {menuItems.map((item, index) => (

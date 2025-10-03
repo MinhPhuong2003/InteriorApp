@@ -172,7 +172,7 @@ const HomeScreen = () => {
                   name: item.name,
                   price: item.price,
                   image: item.image,
-                  description: item.detail || 'Không có mô tả chi tiết',
+                  description: item.description || 'Không có mô tả chi tiết',
                 })
               }
             >
@@ -189,7 +189,7 @@ const HomeScreen = () => {
                       name: item.name,
                       price: item.price,
                       image: item.image,
-                      description: item.detail || 'Không có mô tả chi tiết',
+                      description: item.description || 'Không có mô tả chi tiết',
                     })
                   }
                 >

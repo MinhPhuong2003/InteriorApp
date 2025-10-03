@@ -9,32 +9,19 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 
-const specifications = [
-  { label: 'Chất liệu', value: 'Gỗ tự nhiên' },
-  { label: 'Kích thước', value: '200 x 150 x 100 cm' },
-  { label: 'Màu sắc', value: 'Nâu đậm' },
-];
-
-const relatedProducts = [
-  {
-    id: '1',
-    name: 'Bàn làm việc hiện đại',
-    image:
-      'https://firebasestorage.googleapis.com/v0/b/your-app.appspot.com/o/products%2Fban1.jpg?alt=media',
-  },
-  {
-    id: '2',
-    name: 'Kệ sách gỗ',
-    image:
-      'https://firebasestorage.googleapis.com/v0/b/your-app.appspot.com/o/products%2Fke1.jpg?alt=media',
-  },
-];
+const formatPrice = (value) => {
+  if (!value) return '';
+  return new Intl.NumberFormat('vi-VN').format(Number(value)) + 'đ';
+};
 
 const ProductDetailScreen = ({ route, navigation }) => {
   const { name, price, image, description } = route.params;
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView 
+      style={styles.container}
+      contentContainerStyle={{ flexGrow: 1, padding: 16 }}
+    >
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
@@ -48,62 +35,30 @@ const ProductDetailScreen = ({ route, navigation }) => {
         </TouchableOpacity>
       </View>
 
-      {/* Main Image từ Firebase */}
-      <Image source={{ uri: image }} style={styles.image} />
+      {/* Nội dung chính */}
+      <View style={{ flex: 1 }}>
+        <Image source={{ uri: image }} style={styles.image} />
 
-      {/* Thông tin chính */}
-      <Text style={styles.name}>{name}</Text>
-      <Text style={styles.price}>{price} đ</Text>
-      <Text style={styles.description}>{description}</Text>
+        <View style={{ marginBottom: 12 }}>
+          <Text style={styles.label}>
+            Tên sản phẩm: <Text style={styles.value}>{name}</Text>
+          </Text>
 
-      {/* Thông số kỹ thuật */}
-      <Text style={styles.sectionTitle}>Thông số kỹ thuật</Text>
-      {specifications.map((item, index) => (
-        <View key={index} style={styles.specRow}>
-          <Text style={styles.specLabel}>{item.label}:</Text>
-          <Text style={styles.specValue}>{item.value}</Text>
+          <Text style={styles.label}>
+            Giá: <Text style={styles.price}>{formatPrice(price)}</Text>
+          </Text>
+
+          <Text style={[styles.label, { marginBottom: 4 }]}>Mô tả:</Text>
+          <Text style={styles.description}>{description}</Text>
         </View>
-      ))}
-
-      {/* Đánh giá */}
-      <Text style={styles.sectionTitle}>Đánh giá</Text>
-      <View style={styles.infoBox}>
-        <Text style={styles.infoTitle}>Đánh giá:</Text>
-        <View
-          style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 4 }}
-        >
-          {[1, 2, 3, 4, 5].map((_, i) => (
-            <Icon key={i} name="star" size={20} color="#FFD700" />
-          ))}
-          <Text style={{ marginLeft: 8 }}>(4.8/5)</Text>
-        </View>
-        <Text style={styles.infoText}>
-          "Sản phẩm đẹp, giao hàng nhanh!" - Khách hàng A
-        </Text>
       </View>
 
-      {/* Sản phẩm liên quan */}
-      <Text style={styles.sectionTitle}>Sản phẩm liên quan</Text>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-        {relatedProducts.map((item) => (
-          <TouchableOpacity key={item.id} style={styles.relatedItem}>
-            <Image source={{ uri: item.image }} style={styles.relatedImage} />
-            <Text style={styles.relatedName}>{item.name}</Text>
-          </TouchableOpacity>
-        ))}
-      </ScrollView>
-
-      {/* Nút Mua Ngay */}
+      {/* Nút Mua Ngay nằm cuối */}
       <TouchableOpacity
         style={styles.buyNowButton}
         onPress={() => console.log('Mua ngay')}
       >
-        <Icon
-          name="cart"
-          size={20}
-          color="#fff"
-          style={{ marginRight: 8 }}
-        />
+        <Icon name="cart" size={20} color="#fff" style={{ marginRight: 8 }} />
         <Text style={styles.buyNowText}>MUA NGAY</Text>
       </TouchableOpacity>
     </ScrollView>
@@ -116,7 +71,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
-    padding: 16,
   },
   header: {
     flexDirection: 'row',
@@ -134,69 +88,15 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     marginBottom: 16,
   },
-  name: {
-    fontSize: 18,
-    fontWeight: '600',
-    marginBottom: 6,
-  },
   price: {
     fontSize: 16,
     color: '#e91e63',
-    marginBottom: 10,
+    fontWeight: '600',
   },
   description: {
     fontSize: 14,
     color: '#444',
     lineHeight: 20,
-  },
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    marginTop: 10,
-    marginBottom: 10,
-  },
-  specRow: {
-    flexDirection: 'row',
-    marginBottom: 6,
-  },
-  specLabel: {
-    fontWeight: '500',
-    width: 100,
-    color: '#555',
-  },
-  specValue: {
-    color: '#333',
-  },
-  infoBox: {
-    backgroundColor: '#F2F2F2',
-    padding: 12,
-    borderRadius: 8,
-    marginBottom: 16,
-  },
-  infoTitle: {
-    fontSize: 15,
-    fontWeight: '600',
-    marginBottom: 6,
-  },
-  infoText: {
-    fontSize: 13,
-    color: '#333',
-    lineHeight: 20,
-  },
-  relatedItem: {
-    marginRight: 12,
-    alignItems: 'center',
-    width: 100,
-  },
-  relatedImage: {
-    width: 100,
-    height: 80,
-    borderRadius: 8,
-  },
-  relatedName: {
-    fontSize: 12,
-    marginTop: 4,
-    textAlign: 'center',
   },
   buyNowButton: {
     flexDirection: 'row',
@@ -205,12 +105,22 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 24,
-    marginBottom: 32,
+    marginTop: 'auto',
+    marginBottom: 6,
   },
   buyNowText: {
     color: '#fff',
     fontWeight: '600',
     fontSize: 15,
+  },
+  label: {
+    fontSize: 15,
+    fontWeight: '500',
+    color: '#333',
+    marginBottom: 6,
+  },
+  value: {
+    fontWeight: '400',
+    color: '#555',
   },
 });

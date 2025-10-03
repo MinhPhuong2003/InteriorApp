@@ -14,6 +14,7 @@ import ProductScreen from '../screens/ProductScreen';
 import ProductDetailScreen from '../screens/ProductDetailScreen';
 import CartScreen from '../screens/CartScreen';
 import CheckOutScreen from '../screens/CheckOutScreen';
+import EditProfileScreen from '../screens/EditProfileScreen';
 import VlogScreen from '../screens/VlogScreen';
 import ContactScreen from '../screens/ContactScreen';
 import HelpScreen from '../screens/HelpScreen';
@@ -54,6 +55,7 @@ const AppNavigator = () => (
     <Stack.Screen name="Vlog" component={VlogScreen} />
     <Stack.Screen name="Contact" component={ContactScreen} />
     <Stack.Screen name="Help" component={HelpScreen} />
+    <Stack.Screen name="EditProfile" component={EditProfileScreen} />
     <Stack.Screen name="AdminDashboard" component={AdminDashboardScreen} />
     <Stack.Screen name="AdminProduct" component={AdminProductScreen} />
     <Stack.Screen name="AdminOrder" component={AdminOrderScreen} />

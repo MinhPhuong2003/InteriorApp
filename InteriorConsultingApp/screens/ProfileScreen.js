@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -6,40 +6,111 @@ import {
   Image,
   TouchableOpacity,
   ScrollView,
+  ActivityIndicator,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
+import firestore from '@react-native-firebase/firestore';
+import auth from '@react-native-firebase/auth';
+import { launchImageLibrary } from 'react-native-image-picker';
 
 const ProfileScreen = ({ navigation }) => {
+  const [userData, setUserData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [avatar, setAvatar] = useState(null);
+
+  useEffect(() => {
+    const currentUser = auth().currentUser;
+    if (currentUser) {
+      const unsubscribe = firestore()
+        .collection('users')
+        .doc(currentUser.uid)
+        .onSnapshot(doc => {
+          if (doc.exists) {
+            const data = doc.data();
+            setUserData(data);
+            setAvatar(data.avatar || null); // lấy avatar từ Firestore
+          }
+          setLoading(false);
+        });
+
+      return () => unsubscribe();
+    } else {
+      setLoading(false);
+    }
+  }, []);
+
+  const pickImage = () => {
+    launchImageLibrary(
+      { mediaType: 'photo', quality: 0.8 },
+      (response) => {
+        if (response.didCancel) {
+          console.log('Người dùng hủy chọn ảnh');
+        } else if (response.errorCode) {
+          console.log('Lỗi khi chọn ảnh:', response.errorMessage);
+        } else if (response.assets && response.assets.length > 0) {
+          setAvatar(response.assets[0].uri); // chỉ update local avatar
+        }
+      }
+    );
+  };
+
+  if (loading) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" color="#3498db" />
+      </View>
+    );
+  }
+
+  if (!userData) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <Text>Không có dữ liệu người dùng</Text>
+      </View>
+    );
+  }
+
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.profileCard}>
-        <Image
-          source={require('../assets/logo.png')}
-          style={styles.avatar}
-        />
-        <Text style={styles.name}>Võ Lê Minh Phương</Text>
+        {/* Avatar bấm để đổi ảnh */}
+        <TouchableOpacity onPress={pickImage}>
+          <Image
+            source={
+              avatar
+                ? { uri: avatar }
+                : require('../assets/logo.png') // avatar mặc định
+            }
+            style={styles.avatar}
+          />
+        </TouchableOpacity>
+
+        <Text style={styles.name}>{userData.name}</Text>
 
         {/* Thông tin người dùng */}
         <View style={styles.infoContainer}>
           <View style={styles.infoRow}>
             <Icon name="mail-outline" size={20} color="#888" />
-            <Text style={styles.infoText}>phuongminh392@gmail.com</Text>
+            <Text style={styles.infoText}>{userData.email}</Text>
           </View>
 
           <View style={styles.infoRow}>
             <Icon name="location-outline" size={20} color="#888" />
-            <Text style={styles.infoText}>Ninh Thuận</Text>
+            <Text style={styles.infoText}>{userData.address}</Text>
           </View>
 
           <View style={styles.infoRow}>
             <Icon name="call-outline" size={20} color="#888" />
-            <Text style={styles.infoText}>0378256319</Text>
+            <Text style={styles.infoText}>{userData.phone}</Text>
           </View>
         </View>
 
         {/* Nút */}
         <View style={styles.buttonContainer}>
-          <TouchableOpacity style={styles.button}>
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() => navigation.navigate('EditProfile')}
+          >
             <Icon name="create-outline" size={18} color="#fff" />
             <Text style={styles.buttonText}>Chỉnh sửa</Text>
           </TouchableOpacity>
@@ -53,6 +124,7 @@ const ProfileScreen = ({ navigation }) => {
           </TouchableOpacity>
         </View>
       </View>
+
       {/* Đơn mua - trạng thái */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Đơn mua</Text>
@@ -111,6 +183,8 @@ const styles = StyleSheet.create({
     height: 100,
     borderRadius: 50,
     marginBottom: 16,
+    borderWidth: 2,
+    borderColor: '#3498db',
   },
   name: {
     fontSize: 22,

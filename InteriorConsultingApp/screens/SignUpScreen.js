@@ -23,6 +23,10 @@ const SignUpScreen = ({ navigation }) => {
   const signUpSchema = Yup.object().shape({
     name: Yup.string().required('Vui lòng nhập tên'),
     email: Yup.string().email('Email không hợp lệ').required('Vui lòng nhập email'),
+    phone: Yup.string()
+      .matches(/^[0-9]{9,11}$/, 'Số điện thoại không hợp lệ')
+      .required('Vui lòng nhập số điện thoại'),
+    address: Yup.string().required('Vui lòng nhập địa chỉ'),
     password: Yup.string().min(6, 'Tối thiểu 6 ký tự').required('Vui lòng nhập mật khẩu'),
     confirmPassword: Yup.string()
       .oneOf([Yup.ref('password')], 'Mật khẩu không khớp')
@@ -31,15 +35,13 @@ const SignUpScreen = ({ navigation }) => {
 
   const handleSignUp = async (values) => {
     try {
-      setLoading(true); 
-      // Tạo tài khoản Firebase Auth
+      setLoading(true);
       const userCredential = await auth().createUserWithEmailAndPassword(
         values.email,
         values.password
       );
       const uid = userCredential.user.uid;
 
-      // Cập nhật tên hiển thị
       await userCredential.user.updateProfile({
         displayName: values.name,
       });
@@ -48,24 +50,21 @@ const SignUpScreen = ({ navigation }) => {
       await firestore().collection('users').doc(uid).set({
         name: values.name,
         email: values.email,
-        role: 'user', // mặc định là user
+        phone: values.phone,
+        address: values.address,
+        role: 'user',
         createdAt: firestore.FieldValue.serverTimestamp(),
       });
 
-      setLoading(false); 
+      setLoading(false);
       Alert.alert(
         'Đăng ký thành công',
         'Tài khoản đã được tạo!',
-        [
-          {
-            text: 'OK',
-            onPress: () => navigation.navigate('Login'),
-          },
-        ],
+        [{ text: 'OK', onPress: () => navigation.navigate('Login') }],
         { cancelable: false }
       );
     } catch (error) {
-      setLoading(false); 
+      setLoading(false);
       console.log(error);
       if (error.code === 'auth/email-already-in-use') {
         Alert.alert('Lỗi', 'Email đã được sử dụng');
@@ -85,7 +84,7 @@ const SignUpScreen = ({ navigation }) => {
       </Text>
 
       <Formik
-        initialValues={{ name: '', email: '', password: '', confirmPassword: '' }}
+        initialValues={{ name: '', email: '', phone: '', address: '', password: '', confirmPassword: '' }}
         validationSchema={signUpSchema}
         onSubmit={handleSignUp}
       >
@@ -118,6 +117,33 @@ const SignUpScreen = ({ navigation }) => {
             </View>
             {touched.email && errors.email && <Text style={styles.error}>{errors.email}</Text>}
 
+            {/* Số điện thoại */}
+            <View style={styles.inputContainer}>
+              <Icon name="call-outline" size={20} color="#999" style={styles.icon} />
+              <TextInput
+                style={styles.input}
+                placeholder="Số điện thoại"
+                keyboardType="phone-pad"
+                onChangeText={handleChange('phone')}
+                onBlur={handleBlur('phone')}
+                value={values.phone}
+              />
+            </View>
+            {touched.phone && errors.phone && <Text style={styles.error}>{errors.phone}</Text>}
+
+            {/* Địa chỉ */}
+            <View style={styles.inputContainer}>
+              <Icon name="home-outline" size={20} color="#999" style={styles.icon} />
+              <TextInput
+                style={styles.input}
+                placeholder="Địa chỉ"
+                onChangeText={handleChange('address')}
+                onBlur={handleBlur('address')}
+                value={values.address}
+              />
+            </View>
+            {touched.address && errors.address && <Text style={styles.error}>{errors.address}</Text>}
+
             {/* Mật khẩu */}
             <View style={styles.inputContainer}>
               <Icon name="lock-closed-outline" size={20} color="#999" style={styles.icon} />
@@ -137,9 +163,7 @@ const SignUpScreen = ({ navigation }) => {
                 />
               </TouchableOpacity>
             </View>
-            {touched.password && errors.password && (
-              <Text style={styles.error}>{errors.password}</Text>
-            )}
+            {touched.password && errors.password && <Text style={styles.error}>{errors.password}</Text>}
 
             {/* Xác nhận mật khẩu */}
             <View style={styles.inputContainer}>
@@ -152,9 +176,7 @@ const SignUpScreen = ({ navigation }) => {
                 onBlur={handleBlur('confirmPassword')}
                 value={values.confirmPassword}
               />
-              <TouchableOpacity
-                onPress={() => setShowConfirmPassword(!showConfirmPassword)}
-              >
+              <TouchableOpacity onPress={() => setShowConfirmPassword(!showConfirmPassword)}>
                 <Icon
                   name={showConfirmPassword ? 'eye-off-outline' : 'eye-outline'}
                   size={20}
@@ -170,10 +192,10 @@ const SignUpScreen = ({ navigation }) => {
             <TouchableOpacity
               style={styles.button}
               onPress={handleSubmit}
-              disabled={loading} 
+              disabled={loading}
             >
               {loading ? (
-                <ActivityIndicator color="#fff" /> 
+                <ActivityIndicator color="#fff" />
               ) : (
                 <Text style={styles.buttonText}>Đăng Ký</Text>
               )}
