@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { View, Text, StyleSheet } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import HomeScreen from '../screens/HomeScreen';
 import BookingListScreen from '../screens/BookingListScreen';
@@ -8,12 +9,19 @@ import InteriorScreen from '../screens/InteriorScreen';
 import ProductScreen from '../screens/ProductScreen';
 import SideMenu from '../components/SideMenu';
 import SettingsModal from '../components/SettingsModal';
+import { CartContext } from '../context/CartContext';
 
 const Tab = createBottomTabNavigator();
 
 const MainTabs = ({ navigation }) => {
   const [isMenuVisible, setMenuVisible] = useState(false);
   const [isSettingsVisible, setSettingsVisible] = useState(false);
+  const { totalQuantity } = useContext(CartContext);
+  console.log('Total Quantity in MainTabs:', totalQuantity);
+
+  if (totalQuantity === undefined) {
+    console.error('CartContext not available or totalQuantity is undefined');
+  }
 
   const renderHeaderLeft = () => (
     <Icon
@@ -28,13 +36,21 @@ const MainTabs = ({ navigation }) => {
   const renderHeaderRight = (nav, isProductTab) => {
     if (isProductTab) {
       return (
-        <Icon
-          name="cart-outline"
-          size={24}
-          color="#000"
-          style={{ marginRight: 16 }}
-          onPress={() => nav.navigate('Cart')}
-        />
+        <View style={{ position: 'relative', marginRight: 16 }}>
+          <Icon
+            name="cart-outline"
+            size={24}
+            color="#000"
+            onPress={() => nav.navigate('Cart')}
+          />
+          {totalQuantity > 0 && (
+            <View style={styles.badge}>
+              <Text style={styles.badgeText}>
+                {totalQuantity > 9 ? '9+' : totalQuantity}
+              </Text>
+            </View>
+          )}
+        </View>
       );
     }
     return (
@@ -48,9 +64,19 @@ const MainTabs = ({ navigation }) => {
     );
   };
 
+  const renderProductTabIcon = ({ color, size }) => (
+    <Icon name="cube-outline" size={size} color={color} />
+  );
+
   return (
     <>
-      <Tab.Navigator screenOptions={{ headerShown: true }}>
+      <Tab.Navigator
+        screenOptions={{
+          headerShown: true,
+          tabBarStyle: { height: 60, paddingBottom: 5 },
+          headerStyle: { height: 60 },
+        }}
+      >
         <Tab.Screen
           name="TRANG CHỦ"
           component={HomeScreen}
@@ -81,10 +107,8 @@ const MainTabs = ({ navigation }) => {
           options={({ navigation }) => ({
             headerTitleAlign: 'center',
             headerLeft: renderHeaderLeft,
-            headerRight: () => renderHeaderRight(navigation, true), // Dùng nút giỏ hàng
-            tabBarIcon: ({ color, size }) => (
-              <Icon name="cube-outline" size={size} color={color} />
-            ),
+            headerRight: () => renderHeaderRight(navigation, true),
+            tabBarIcon: renderProductTabIcon,
           })}
         />
         <Tab.Screen
@@ -119,5 +143,25 @@ const MainTabs = ({ navigation }) => {
   );
 };
 
-export default MainTabs;
+const styles = StyleSheet.create({
+  badge: {
+    position: 'absolute',
+    right: -10,
+    top: -5,
+    backgroundColor: 'red',
+    borderRadius: 10,
+    minWidth: 18,
+    height: 18,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 4,
+  },
+  badgeText: {
+    color: 'white',
+    fontSize: 10,
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
+});
 
+export default MainTabs;

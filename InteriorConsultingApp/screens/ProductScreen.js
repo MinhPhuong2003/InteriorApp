@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useContext } from 'react';
 import {
   View,
   Text,
@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import firestore from '@react-native-firebase/firestore';
+import { CartContext } from '../context/CartContext';
 
 const { width } = Dimensions.get('window');
 const productWidth = width / 2 - 24;
@@ -36,20 +37,27 @@ const ProductScreen = ({ navigation }) => {
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [searchText, setSearchText] = useState('');
   const [currentBannerIndex, setCurrentBannerIndex] = useState(0);
-
   const flatListRef = useRef();
+
+  const { addToCart } = useContext(CartContext);
 
   useEffect(() => {
     const unsubscribe = firestore()
       .collection('products')
       .orderBy('createdAt', 'desc')
-      .onSnapshot(snapshot => {
-        const list = snapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-        setProducts(list);
-      });
+      .onSnapshot(
+        snapshot => {
+          const list = snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data(),
+          }));
+          console.log('Products from Firestore:', list);
+          setProducts(list);
+        },
+        error => {
+          console.error('Error fetching products:', error);
+        }
+      );
     return () => unsubscribe();
   }, []);
 
@@ -68,9 +76,7 @@ const ProductScreen = ({ navigation }) => {
       p.name.toLowerCase().includes(searchText.toLowerCase())
   );
 
-  const renderBanner = ({ item }) => (
-    <Image source={item} style={styles.bannerImage} />
-  );
+  const renderBanner = ({ item }) => <Image source={item} style={styles.bannerImage} />;
 
   const renderCategory = ({ item }) => (
     <TouchableOpacity
@@ -91,16 +97,11 @@ const ProductScreen = ({ navigation }) => {
 
   const renderProduct = ({ item }) => (
     <View style={styles.productItem}>
-      <TouchableOpacity
-        onPress={() =>
-          navigation.navigate('ProductDetail', {
-            ...item,
-          })
-        }
-      >
+      <TouchableOpacity onPress={() => navigation.navigate('ProductDetail', { ...item })}>
         <Image
           source={{ uri: item.image }}
           style={styles.productImage}
+          onError={(e) => console.log('Error loading product image:', e.nativeEvent.error)}
         />
         <Text style={styles.productName}>{item.name}</Text>
         <Text style={styles.productPrice}>
@@ -109,7 +110,10 @@ const ProductScreen = ({ navigation }) => {
       </TouchableOpacity>
       <TouchableOpacity
         style={styles.addToCartButton}
-        onPress={() => console.log('Thêm vào giỏ:', item.name)}
+        onPress={() => {
+          addToCart(item);
+          console.log('Added to cart:', item);
+        }}
       >
         <Icon name="cart-outline" size={18} color="#fff" style={{ marginRight: 6 }} />
         <Text style={styles.addToCartText}>Thêm vào giỏ</Text>
@@ -119,7 +123,6 @@ const ProductScreen = ({ navigation }) => {
 
   return (
     <ScrollView style={styles.container}>
-      {/* Banner */}
       <View style={styles.bannerContainer}>
         <FlatList
           data={banners}
@@ -152,7 +155,6 @@ const ProductScreen = ({ navigation }) => {
         </TouchableOpacity>
       </View>
 
-      {/* Danh mục */}
       <Text style={styles.title}>DANH MỤC SẢN PHẨM</Text>
       <FlatList
         data={categories}
@@ -163,7 +165,6 @@ const ProductScreen = ({ navigation }) => {
         contentContainerStyle={styles.categoryList}
       />
 
-      {/* Thanh tìm kiếm */}
       <View style={styles.searchContainer}>
         <Icon name="search-outline" size={24} color="#999" style={{ marginRight: 8 }} />
         <TextInput
@@ -174,7 +175,6 @@ const ProductScreen = ({ navigation }) => {
         />
       </View>
 
-      {/* Sản phẩm */}
       <FlatList
         data={filteredProducts}
         renderItem={renderProduct}
@@ -188,19 +188,9 @@ const ProductScreen = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-  },
-  bannerContainer: {
-    position: 'relative',
-    height: 180,
-  },
-  bannerImage: {
-    width,
-    height: 180,
-    resizeMode: 'cover',
-  },
+  container: { flex: 1, backgroundColor: '#fff' },
+  bannerContainer: { position: 'relative', height: 180 },
+  bannerImage: { width, height: 180, resizeMode: 'cover' },
   arrowLeft: {
     position: 'absolute',
     top: '40%',
@@ -219,103 +209,21 @@ const styles = StyleSheet.create({
     padding: 5,
     zIndex: 1,
   },
-  title: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginTop: 12,
-    marginBottom: 4,
-    textAlign: 'center',
-  },
-  categoryList: {
-    paddingHorizontal: 16,
-    paddingBottom: 10,
-  },
-  categoryItem: {
-    alignItems: 'center',
-    marginRight: 2,
-    width: 60,
-  },
-  categoryItemActive: {
-    borderBottomWidth: 2,
-    borderBottomColor: '#F79B34',
-  },
-  iconWrapper: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: '#fff3e8',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 6,
-  },
-  categoryLabel: {
-    fontSize: 13,
-    color: '#333',
-    textAlign: 'center',
-  },
-  searchContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#f0f0f0',
-    marginHorizontal: 16,
-    borderRadius: 16,
-    paddingHorizontal: 12,
-    marginBottom: 10,
-    height: 50,
-  },
-  searchInput: {
-    flex: 1,
-    fontSize: 16,
-  },
-  productList: {
-    alignItems: 'center',
-    paddingBottom: 20,
-  },
-  productItem: {
-    width: productWidth,
-    backgroundColor: '#f9f9f9',
-    borderRadius: 10,
-    margin: 8,
-    padding: 10,
-    alignItems: 'stretch',
-    minHeight: 240,
-    justifyContent: 'space-between',
-  },
-  productImage: {
-    width: '100%',
-    height: 120,
-    borderRadius: 8,
-    resizeMode: 'cover',
-  },
-  productName: {
-    marginTop: 8,
-    fontSize: 14,
-    fontWeight: '500',
-    textAlign: 'center',
-    minHeight: 40,
-  },
-  productPrice: {
-    fontSize: 14,
-    color: '#e91e63',
-    marginTop: 4,
-    textAlign: 'center',
-  },
-  addToCartButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#F79B34',
-    paddingVertical: 6,
-    borderRadius: 6,
-    marginTop: 8,
-    alignSelf: 'stretch',
-  },
-  addToCartText: {
-    color: '#fff',
-    fontSize: 13,
-    fontWeight: '600',
-  },
+  title: { fontSize: 20, fontWeight: 'bold', marginTop: 12, marginBottom: 4, textAlign: 'center' },
+  categoryList: { paddingHorizontal: 16, paddingBottom: 10 },
+  categoryItem: { alignItems: 'center', marginRight: 2, width: 60 },
+  categoryItemActive: { borderBottomWidth: 2, borderBottomColor: '#F79B34' },
+  iconWrapper: { width: 50, height: 50, borderRadius: 25, backgroundColor: '#fff3e8', justifyContent: 'center', alignItems: 'center', marginBottom: 6 },
+  categoryLabel: { fontSize: 13, color: '#333', textAlign: 'center' },
+  searchContainer: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#f0f0f0', marginHorizontal: 16, borderRadius: 16, paddingHorizontal: 12, marginBottom: 10, height: 50 },
+  searchInput: { flex: 1, fontSize: 16 },
+  productList: { alignItems: 'center', paddingBottom: 20 },
+  productItem: { width: productWidth, backgroundColor: '#f9f9f9', borderRadius: 10, margin: 8, padding: 10, alignItems: 'stretch', minHeight: 240, justifyContent: 'space-between' },
+  productImage: { width: '100%', height: 120, borderRadius: 8, resizeMode: 'cover' },
+  productName: { marginTop: 8, fontSize: 14, fontWeight: '500', textAlign: 'center', minHeight: 40 },
+  productPrice: { fontSize: 14, color: '#e91e63', marginTop: 4, textAlign: 'center' },
+  addToCartButton: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: '#F79B34', paddingVertical: 6, borderRadius: 6, marginTop: 8, alignSelf: 'stretch' },
+  addToCartText: { color: '#fff', fontSize: 13, fontWeight: '600' },
 });
-
 
 export default ProductScreen;

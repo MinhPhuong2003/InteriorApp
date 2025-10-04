@@ -85,13 +85,6 @@ const AdminDashboardScreen = ({ navigation }) => {
         </View>
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.card} onPress={() => navigation.navigate('AdminFeedback')}>
-        <View style={styles.row}>
-          <Icon name="chatbox-ellipses-outline" size={20} color="#4A44F2" />
-          <Text style={styles.cardText}>Quản lý đánh giá & phản hồi</Text>
-        </View>
-      </TouchableOpacity>
-
       {/* Mới: Chat realtime */}
       <TouchableOpacity style={styles.card} onPress={() => navigation.navigate('AdminChat')}>
         <View style={styles.row}>

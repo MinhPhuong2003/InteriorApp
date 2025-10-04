@@ -15,8 +15,8 @@ const SettingsModal = ({ visible, onClose }) => {
   const navigation = useNavigation();
 
   const handleChangePassword = () => {
-    onClose(); // Đóng modal trước
-    navigation.navigate('CreateNewPassword'); // Điều hướng sang màn hình đổi mật khẩu
+    onClose();
+    navigation.navigate('CreateNewPassword');
   };
 
   return (

@@ -1,105 +1,63 @@
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import {
   View, Text, StyleSheet, TouchableOpacity,
   FlatList, Image, Modal,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-
-const initialCart = [
-  {
-    id: '1',
-    name: 'Ghế Vải',
-    price: 590000,
-    image: require('../assets/logo.png'),
-    quantity: 1,
-  },
-  {
-    id: '2',
-    name: 'Bộ Ghế Vải',
-    price: 1800000,
-    image: require('../assets/logo.png'),
-    quantity: 3,
-  },
-  {
-    id: '3',
-    name: 'Sofa Vải',
-    price: 2500000,
-    image: require('../assets/logo.png'),
-    quantity: 1,
-  },
-];
+import { CartContext } from '../context/CartContext';
 
 const CartScreen = ({ navigation }) => {
-  const [cartItems, setCartItems] = useState(initialCart);
-
-  // State modal
+  const { cartItems, updateQuantity, removeItem, totalPrice, totalQuantity, resetCart } = useContext(CartContext);
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
-
-  const totalPrice = cartItems.reduce(
-    (sum, item) => sum + item.price * item.quantity, 0
-  );
-  const shippingFee = 49900;
-  const grandTotal = totalPrice + shippingFee;
-
-  const updateQuantity = (id, type) => {
-    setCartItems(prev =>
-      prev.map(item =>
-        item.id === id
-          ? {
-              ...item,
-              quantity:
-                type === 'inc'
-                  ? item.quantity + 1
-                  : item.quantity > 1
-                  ? item.quantity - 1
-                  : 1,
-            }
-          : item
-      )
-    );
-  };
-
-  // Mở modal xác nhận xóa
+  const shippingFee = 0;
+  const grandTotal = (totalPrice || 0) + shippingFee;
   const confirmRemoveItem = (item) => {
     setSelectedItem(item);
     setModalVisible(true);
   };
 
-  // Xóa item thật sự
-  const removeItem = () => {
-    if (!selectedItem) return;
-    setCartItems(prev => prev.filter(item => item.id !== selectedItem.id));
-    setSelectedItem(null);
-    setModalVisible(false);
+  const handleRemove = () => {
+    if (selectedItem) {
+      removeItem(selectedItem.id);
+      setSelectedItem(null);
+      setModalVisible(false);
+    }
   };
 
-  const renderItem = ({ item }) => (
-    <View style={styles.card}>
-      <Image source={item.image} style={styles.image} />
-      <View style={{ flex: 1, marginLeft: 12 }}>
-        <Text style={styles.name}>{item.name}</Text>
-        <Text style={styles.price}>{item.price.toLocaleString()} đ</Text>
+  const renderItem = ({ item }) => {
+    console.log('Cart item image:', item.image);
+    return (
+      <View style={styles.card}>
+        <Image
+          source={{ uri: item.image }}
+          style={styles.image}
+          onError={(e) => {
+            console.log('Error loading cart image:', e.nativeEvent.error);
+          }}
+        />
+        <View style={{ flex: 1, marginLeft: 12 }}>
+          <Text style={styles.name}>{item.name || 'Tên không xác định'}</Text>
+          <Text style={styles.price}>{(item.price || 0).toLocaleString()} đ</Text>
+        </View>
+        <View style={styles.qtyContainer}>
+          <TouchableOpacity onPress={() => updateQuantity(item.id, 'dec')}>
+            <Ionicons name="remove-circle-outline" size={24} color="#666" />
+          </TouchableOpacity>
+          <Text style={styles.qty}>{item.quantity || 0}</Text>
+          <TouchableOpacity onPress={() => updateQuantity(item.id, 'inc')}>
+            <Ionicons name="add-circle-outline" size={24} color="#666" />
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => confirmRemoveItem(item)} style={{ marginLeft: 12 }}>
+            <Ionicons name="trash-outline" size={24} color="#cc0000" />
+          </TouchableOpacity>
+        </View>
       </View>
-      <View style={styles.qtyContainer}>
-        <TouchableOpacity onPress={() => updateQuantity(item.id, 'dec')}>
-          <Ionicons name="remove-circle-outline" size={24} color="#666" />
-        </TouchableOpacity>
-        <Text style={styles.qty}>{item.quantity}</Text>
-        <TouchableOpacity onPress={() => updateQuantity(item.id, 'inc')}>
-          <Ionicons name="add-circle-outline" size={24} color="#666" />
-        </TouchableOpacity>
-
-        <TouchableOpacity onPress={() => confirmRemoveItem(item)} style={{ marginLeft: 12 }}>
-          <Ionicons name="trash-outline" size={24} color="#cc0000" />
-        </TouchableOpacity>
-      </View>
-    </View>
-  );
+    );
+  };
 
   return (
     <View style={styles.container}>
-      {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Ionicons name="arrow-back" size={24} color="#000" />
@@ -108,21 +66,23 @@ const CartScreen = ({ navigation }) => {
         <View style={{ width: 24 }} />
       </View>
 
-      {/* List */}
       <FlatList
-        data={cartItems}
+        data={cartItems || []}
         keyExtractor={(item) => item.id}
         renderItem={renderItem}
         contentContainerStyle={{ padding: 16 }}
         ListEmptyComponent={<Text style={{ textAlign: 'center', marginTop: 40, fontSize: 16 }}>Giỏ hàng trống</Text>}
       />
 
-      {/* Footer */}
-      {cartItems.length > 0 && (
+      {cartItems && cartItems.length > 0 && (
         <View style={styles.footer}>
           <View style={styles.row}>
             <Text style={styles.footerLabel}>Tạm tính</Text>
-            <Text style={styles.footerValue}>{totalPrice.toLocaleString()} đ</Text>
+            <Text style={styles.footerValue}>{(totalPrice || 0).toLocaleString()} đ</Text>
+          </View>
+          <View style={styles.row}>
+            <Text style={styles.footerLabel}>Số lượng</Text>
+            <Text style={styles.footerValue}>{totalQuantity || 0} sản phẩm</Text>
           </View>
           <View style={styles.row}>
             <Text style={styles.footerLabel}>Phí vận chuyển</Text>
@@ -133,42 +93,37 @@ const CartScreen = ({ navigation }) => {
             <Text style={[styles.footerValue, { fontWeight: 'bold' }]}>{grandTotal.toLocaleString()} đ</Text>
           </View>
           <TouchableOpacity
-  style={styles.checkoutButton}
-  onPress={() => navigation.navigate('CheckOut', { totalPrice })}
->
-  <Text style={styles.checkoutText}>Thanh Toán</Text>
-</TouchableOpacity>
+            style={styles.checkoutButton}
+            onPress={() => {
+              console.log('Navigating to CheckOut with:', { cartItems, totalPrice, totalQuantity, shippingFee });
+              navigation.navigate('CheckOut', { cartItems, totalPrice, totalQuantity, shippingFee });
+            }}
+          >
+            <Text style={styles.checkoutText}>Thanh Toán</Text>
+          </TouchableOpacity>
         </View>
       )}
 
-      {/* Modal xác nhận xóa */}
-      <Modal
-        transparent
-        visible={modalVisible}
-        animationType="none"
-        onRequestClose={() => setModalVisible(false)}
-      >
+      <Modal transparent visible={modalVisible} animationType="none" onRequestClose={() => setModalVisible(false)}>
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             {selectedItem && (
               <>
-                <Image source={selectedItem.image} style={styles.modalImage} />
-                <Text style={styles.modalName}>{selectedItem.name}</Text>
-                <Text style={styles.modalPrice}>{selectedItem.price.toLocaleString()} đ</Text>
-
+                <Image
+                  source={{ uri: selectedItem.image }}
+                  style={styles.modalImage}
+                  onError={(e) => {
+                    console.log('Error loading modal image:', e.nativeEvent.error);
+                  }}
+                />
+                <Text style={styles.modalName}>{selectedItem.name || 'Tên không xác định'}</Text>
+                <Text style={styles.modalPrice}>{(selectedItem.price || 0).toLocaleString()} đ</Text>
                 <Text style={styles.modalQuestion}>Bạn có chắc muốn xóa sản phẩm này khỏi giỏ hàng?</Text>
-
                 <View style={styles.modalButtons}>
-                  <TouchableOpacity
-                    style={[styles.modalButton, { backgroundColor: '#ccc' }]}
-                    onPress={() => setModalVisible(false)}
-                  >
+                  <TouchableOpacity style={[styles.modalButton, { backgroundColor: '#ccc' }]} onPress={() => setModalVisible(false)}>
                     <Text>Không</Text>
                   </TouchableOpacity>
-                  <TouchableOpacity
-                    style={[styles.modalButton, { backgroundColor: '#cc0000' }]}
-                    onPress={removeItem}
-                  >
+                  <TouchableOpacity style={[styles.modalButton, { backgroundColor: '#cc0000' }]} onPress={handleRemove}>
                     <Text style={{ color: '#fff' }}>Có</Text>
                   </TouchableOpacity>
                 </View>

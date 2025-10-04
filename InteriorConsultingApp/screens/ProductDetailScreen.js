@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import {
   View,
   Text,
@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
+import { CartContext } from '../context/CartContext';
 
 const formatPrice = (value) => {
   if (!value) return '';
@@ -15,7 +16,33 @@ const formatPrice = (value) => {
 };
 
 const ProductDetailScreen = ({ route, navigation }) => {
-  const { name, price, image, description } = route.params;
+  const { name, price, image, description, id } = route.params || {};
+  const { addToCart, totalQuantity } = useContext(CartContext);
+  console.log('Route params:', route.params);
+  console.log('addToCart function:', addToCart);
+  console.log('Total Quantity:', totalQuantity);
+
+  const handleAddToCart = () => {
+    if (!addToCart) {
+      console.error('addToCart is undefined. Check CartContext.');
+      return;
+    }
+    const product = { id: id || Date.now().toString(), name, price, image, description };
+    console.log('Adding product to cart:', product);
+    addToCart(product);
+  };
+
+  const handleViewCart = () => {
+    navigation.navigate('Cart');
+  };
+
+  if (!name || !price || !image || !description) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.errorText}>Dữ liệu sản phẩm không hợp lệ!</Text>
+      </View>
+    );
+  }
 
   return (
     <ScrollView 
@@ -30,8 +57,17 @@ const ProductDetailScreen = ({ route, navigation }) => {
 
         <Text style={styles.headerTitle}>CHI TIẾT SẢN PHẨM</Text>
 
-        <TouchableOpacity onPress={() => console.log('Thêm vào giỏ hàng')}>
-          <Icon name="cart-outline" size={24} color="#000" />
+        <TouchableOpacity onPress={handleViewCart}>
+          <View style={{ position: 'relative' }}>
+            <Icon name="cart-outline" size={24} color="#000" />
+            {totalQuantity > 0 && (
+              <View style={styles.badge}>
+                <Text style={styles.badgeText}>
+                  {totalQuantity > 9 ? '9+' : totalQuantity}
+                </Text>
+              </View>
+            )}
+          </View>
         </TouchableOpacity>
       </View>
 
@@ -56,7 +92,7 @@ const ProductDetailScreen = ({ route, navigation }) => {
       {/* Nút Mua Ngay nằm cuối */}
       <TouchableOpacity
         style={styles.buyNowButton}
-        onPress={() => console.log('Mua ngay')}
+        onPress={handleAddToCart}
       >
         <Icon name="cart" size={20} color="#fff" style={{ marginRight: 8 }} />
         <Text style={styles.buyNowText}>MUA NGAY</Text>
@@ -122,5 +158,29 @@ const styles = StyleSheet.create({
   value: {
     fontWeight: '400',
     color: '#555',
+  },
+  errorText: {
+    fontSize: 16,
+    color: 'red',
+    textAlign: 'center',
+    marginTop: 20,
+  },
+  badge: {
+    position: 'absolute',
+    right: -10,
+    top: -5,
+    backgroundColor: 'red',
+    borderRadius: 10,
+    minWidth: 18,
+    height: 18,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 4,
+  },
+  badgeText: {
+    color: 'white',
+    fontSize: 10,
+    fontWeight: 'bold',
+    textAlign: 'center',
   },
 });

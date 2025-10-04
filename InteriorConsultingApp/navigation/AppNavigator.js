@@ -19,6 +19,9 @@ import VlogScreen from '../screens/VlogScreen';
 import ContactScreen from '../screens/ContactScreen';
 import HelpScreen from '../screens/HelpScreen';
 import UserChatScreen from '../screens/UserChatScreen';
+import OrderHistoryScreen from '../screens/OrderHistoryScreen';
+import OrderDetailsScreen from '../screens/OrderDetailsScreen';
+import ProfileScreen from '../screens/ProfileScreen';
 import AdminDashboardScreen from '../screens/admin/AdminDashboardScreen';
 import AdminProductScreen from '../screens/admin/AdminProductScreen';
 import AdminOrderScreen from '../screens/admin/AdminOrderScreen';
@@ -55,6 +58,9 @@ const AppNavigator = () => (
     <Stack.Screen name="Vlog" component={VlogScreen} />
     <Stack.Screen name="Contact" component={ContactScreen} />
     <Stack.Screen name="Help" component={HelpScreen} />
+    <Stack.Screen name="Profile" component={ProfileScreen} />
+    <Stack.Screen name="OrderHistory" component={OrderHistoryScreen} options={{ headerShown: false }} />
+    <Stack.Screen name="OrderDetails" component={OrderDetailsScreen} options={{ headerShown: false }} />
     <Stack.Screen name="EditProfile" component={EditProfileScreen} />
     <Stack.Screen name="AdminDashboard" component={AdminDashboardScreen} />
     <Stack.Screen name="AdminProduct" component={AdminProductScreen} />
