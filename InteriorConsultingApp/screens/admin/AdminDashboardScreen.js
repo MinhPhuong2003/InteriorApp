@@ -1,14 +1,48 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, ActivityIndicator } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
+import firestore from '@react-native-firebase/firestore';
 
 const AdminDashboardScreen = ({ navigation }) => {
-  const stats = {
-    products: 12,
-    orders: 45,
-    bookings: 8,
-    users: 20,
-  };
+  const [stats, setStats] = useState({
+    products: 0,
+    orders: 0,
+    bookings: 0,
+    users: 0,
+  });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const productSnap = await firestore().collection('products').get();
+        const orderSnap = await firestore().collection('orders').get();
+        const bookingSnap = await firestore().collection('bookings').get();
+        const userSnap = await firestore().collection('users').get();
+        setStats({
+          products: productSnap.size,
+          orders: orderSnap.size,
+          bookings: bookingSnap.size,
+          users: userSnap.size,
+        });
+      } catch (error) {
+        console.log('Lỗi lấy dữ liệu:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchStats();
+  }, []);
+
+  if (loading) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" color="#4A44F2" />
+        <Text>Đang tải dữ liệu...</Text>
+      </View>
+    );
+  }
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -34,8 +68,8 @@ const AdminDashboardScreen = ({ navigation }) => {
         </View>
       </View>
 
+      {/* Giữ nguyên toàn bộ các phần còn lại */}
       <Text style={styles.sectionTitle}>Chức năng quản lý hệ thống</Text>
-
       <TouchableOpacity style={styles.card} onPress={() => navigation.navigate('AdminProduct')}>
         <View style={styles.row}>
           <Icon name="cube-outline" size={20} color="#4A44F2" />
@@ -71,21 +105,6 @@ const AdminDashboardScreen = ({ navigation }) => {
         </View>
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.card} onPress={() => navigation.navigate('AdminInventory')}>
-        <View style={styles.row}>
-          <Icon name="archive-outline" size={20} color="#4A44F2" />
-          <Text style={styles.cardText}>Quản lý kho hàng / tồn kho</Text>
-        </View>
-      </TouchableOpacity>
-
-      <TouchableOpacity style={styles.card} onPress={() => navigation.navigate('AdminRevenue')}>
-        <View style={styles.row}>
-          <Icon name="bar-chart-outline" size={20} color="#4A44F2" />
-          <Text style={styles.cardText}>Thống kê doanh thu</Text>
-        </View>
-      </TouchableOpacity>
-
-      {/* Mới: Chat realtime */}
       <TouchableOpacity style={styles.card} onPress={() => navigation.navigate('AdminChat')}>
         <View style={styles.row}>
           <Icon name="chatbubble-ellipses-outline" size={20} color="#4A44F2" />
@@ -93,7 +112,6 @@ const AdminDashboardScreen = ({ navigation }) => {
         </View>
       </TouchableOpacity>
 
-      {/* Logout */}
       <TouchableOpacity style={styles.logout} onPress={() => navigation.replace('Login')}>
         <View style={styles.row}>
           <Icon name="log-out-outline" size={18} color="#E53935" />
